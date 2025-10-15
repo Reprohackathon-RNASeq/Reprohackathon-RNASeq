@@ -14,3 +14,7 @@ $pip freeze > requirements.txt
 Pour sortir du venv : 
 $deactivate
 
+Branch :
+Il faut que chacun travail sur sa branch puis merge vers main une fois le travail fini.
+La gestion des conflits se fait du côté de votre branch (pas du côté de main)
+
