@@ -15,6 +15,48 @@ Pour sortir du venv :
 $deactivate
 
 Branch :
+NE JAMAIS TRAVAILLER SUR MAIN
 Il faut que chacun travail sur sa branch puis merge vers main une fois le travail fini.
-La gestion des conflits se fait du côté de votre branch (pas du côté de main)
+La gestion des conflits se fait du côté de votre branch (pas du côté de main).
+
+Concrètement : 
+1) aller sur sa branch :
+$ git checkout -b nom-de-ta-branche
+
+2) travailler sur sa branch, faire des commits réguliers :
+git add .
+git commit -m "Description claire de tes modifications"
+
+3) Push depuis ta branch vers ta branch sur github : 
+git push origin nom-de-ta-branche
+
+4) MAIS avant de pousser ou de faire une pull request (et plus généralement avant de travailler).
+Mets à jour ta branche avec les derniers changements de main !
+
+4.a) Récupérer les derniers changements de main
+$ git fetch origin
+$ git checkout main
+$ git pull origin main
+
+4.b) Revenir sur ta branche et faire un rebase
+
+$git checkout nom-de-ta-branche
+$git rebase main
+
+4.c) S'il y a des conbflits : les résoudre manuellement puis : 
+
+$ git add .
+$ git rebase --continue
+
+5) Pousser ta branche mise à jour
+
+$ git push origin nom-de-ta-branche --force
+
+6) ENCORE MIEUX : faire une pull request : 
+Va sur GitHub, dans ton dépôt.
+Clique sur Pull Requests > New Pull Request.
+Sélectionne ta branche comme source et main comme cible.
+Ajoute une description claire de tes modifications.
+Assigne un ou plusieurs relecteurs (reviewers).
+
 
