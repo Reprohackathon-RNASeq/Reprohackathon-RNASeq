@@ -1,1 +1,16 @@
 information utiles pour nous :
+
+Virtual environement :
+Il faut se créer un venv chacun pour le projet (à la racine)
+$ python -m venv venv
+Et l'ajouter dans le gitignore :
+echo "venv/" >> .gitignore
+Puis se connecter dans le venv (à faire à chaque fois) : 
+$ source venv/bin/activate
+Puis installer des dependencies: 
+$pip install -r requirements.txt
+Ou bien ajouer les dependencies au requirement :
+$pip freeze > requirements.txt
+Pour sortir du venv : 
+$deactivate
+
