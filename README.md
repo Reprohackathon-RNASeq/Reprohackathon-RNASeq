@@ -114,10 +114,10 @@ Enrichissement fonctionnel (voies KEGG)
 
 ## Étudiants M2 AMI2B - ReproHackaton 2025
 
-[Prénom Nom]
-[Prénom Nom]
-[Prénom Nom]
-[Prénom Nom]
+[Donatien WALLAERT]
+[Tom GORTANA]
+[Marie MEIER]
+[Tom BELLIVIER]
 
 ## 📚 Références
 
