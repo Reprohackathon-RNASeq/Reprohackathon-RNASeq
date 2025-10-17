@@ -41,14 +41,14 @@ Téléchargement FASTQ (SRA) → Trimming → Mapping → Comptage → Analyse D
 projet_reprohackaton/
 ├── workflows/
 │ ├── nextflow.nf # Workflow
-│ └── config.yaml # Configuration
+│ └── config.nf # Configuration
 ├── containers/
 ├── scripts/
 ├── data/
 ├── results/
 ├── README.md
 ├── run.sh # Script d'exécution
-├── gitignore
+├── .gitignore
 └── requirements.txt # venv python
 
 
