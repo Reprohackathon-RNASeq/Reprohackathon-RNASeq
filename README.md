@@ -39,27 +39,17 @@ Téléchargement FASTQ (SRA) → Trimming → Mapping → Comptage → Analyse D
 ## 🗂️ Structure du Projet
 
 projet_reprohackaton/
-├── 📁 workflows/
-│ ├── snakefile.smk # Workflow Snakemake principal
+├── workflows/
+│ ├── nextflow.nf # Workflow
 │ └── config.yaml # Configuration
-├── 📁 containers/
-│ ├── Dockerfile.fastq # Conteneur téléchargement
-│ ├── Dockerfile.rnaseq # Conteneur analyse RNA-Seq
-│ └── Dockerfile.deseq2 # Conteneur analyse statistique
-├── 📁 scripts/
-│ ├── download_sra.py # Script téléchargement SRA
-│ └── deseq2_analysis.R # Analyse différentielle
-├── 📁 data/
-│ ├── raw/ # Données brutes FASTQ
-│ ├── processed/ # Données traitées
-│ └── reference/ # Génome de référence
-├── 📁 results/
-│ ├── counts/ # Matrices de comptage
-│ ├── differential/ # Résultats DESeq2
-│ └── figures/ # Graphiques et plots
-├── 📄 README.md # Ce fichier
-├── 📄 run.sh # Script d'exécution
-└── 📄 environment.yml # Environnement Conda
+├── containers/
+├── scripts/
+├── data/
+├── results/
+├── README.md
+├── run.sh # Script d'exécution
+├── gitignore
+└── environments.txt # venv python
 
 
 ## 🚀 Installation et Exécution
