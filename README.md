@@ -49,7 +49,7 @@ projet_reprohackaton/
 ├── README.md
 ├── run.sh # Script d'exécution
 ├── gitignore
-└── environments.txt # venv python
+└── requirements.txt # venv python
 
 
 ## 🚀 Installation et Exécution
