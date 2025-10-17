@@ -1,0 +1,149 @@
+Excellente question 👏 — c’est un vrai problème courant quand on travaille sur une **VM éphémère** (par ex. une instance cloud qui s’efface à chaque redémarrage).
+
+Tu veux donc une **solution persistante et automatisée** pour que ton environnement (Docker + Nextflow + images + progression du pipeline) soit restauré automatiquement à chaque lancement.
+
+Voici plusieurs **stratégies complémentaires**, classées du plus simple au plus robuste 👇
+
+---
+
+## 🪄 1. Le “script de bootstrap” — un seul fichier à exécuter
+
+Tu peux créer un **script shell unique** (par ex. `setup.sh`) qui :
+
+1. Installe Docker + Nextflow
+2. Télécharge (ou reconstruit) tes images Docker
+3. Monte un répertoire de données persistant (via volume ou disque)
+4. Relance ton pipeline Nextflow à partir de l’état précédent
+
+---
+
+### 🧱 Exemple de `setup.sh`
+
+```bash
+#!/bin/bash
+set -e
+
+echo "=== Installation de Docker et Nextflow ==="
+sudo apt update -y
+sudo apt install -y docker.io curl openjdk-11-jre
+
+if ! command -v nextflow &> /dev/null; then
+  curl -s https://get.nextflow.io | bash
+  sudo mv nextflow /usr/local/bin/
+fi
+
+echo "=== Démarrage de Docker ==="
+sudo systemctl start docker || true
+sudo systemctl enable docker || true
+
+echo "=== Téléchargement des images nécessaires ==="
+docker pull quay.io/biocontainers/sra-tools:3.0.5--hfca6b52_2
+docker pull quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0
+docker pull quay.io/biocontainers/bowtie2:2.5.1--py39hbc8fefb_0
+docker pull quay.io/biocontainers/subread:2.0.6--hed695b0_0
+docker pull bioconductor/deseq2:latest
+
+echo "=== Exécution du pipeline Nextflow ==="
+# le dossier 'work' et 'results' seront montés depuis un disque persistant
+nextflow run main.nf --ACCESSION_ID SRR123456 --docker -resume
+```
+
+> 🔁 Le `-resume` de Nextflow permet de **reprendre exactement là où le pipeline s’est arrêté**, même après redémarrage.
+
+---
+
+## 📦 2. Utiliser un volume ou disque persistant
+
+Tu veux que tes fichiers (inputs, outputs, cache Nextflow) **ne disparaissent pas** entre deux sessions.
+Deux façons de faire selon ton contexte :
+
+### ✅ Option A — Volume Docker local
+
+Crée un volume Docker pour stocker les données Nextflow :
+
+```bash
+docker volume create nfdata
+```
+
+Puis monte-le dans ton script ou ton pipeline :
+
+```bash
+nextflow run main.nf --docker -resume \
+    -with-docker-volume nfdata:/mnt/data
+```
+
+### ✅ Option B — Disque persistant cloud
+
+Si ta VM est sur GCP, AWS ou Azure :
+
+* Monte un **disque persistant** dans `/mnt/nfdata` avant de lancer ton script.
+* Dans ton script :
+
+  ```bash
+  export NXF_WORK=/mnt/nfdata/work
+  export NXF_ASSETS=/mnt/nfdata/assets
+  export NXF_HOME=/mnt/nfdata
+  ```
+
+Ainsi, Nextflow retrouvera automatiquement son cache et reprendra le pipeline.
+
+---
+
+## 🧬 3. Créer une image Docker de ton environnement complet (VM containerisée)
+
+Pour aller plus loin, tu peux tout empaqueter (Nextflow + images + ton pipeline) dans **une seule image Docker**, par exemple :
+
+```dockerfile
+FROM ubuntu:22.04
+RUN apt update && apt install -y docker.io openjdk-11-jre curl
+RUN curl -s https://get.nextflow.io | bash && mv nextflow /usr/local/bin/
+COPY main.nf /pipeline/main.nf
+WORKDIR /pipeline
+ENTRYPOINT ["nextflow", "run", "main.nf", "--docker", "-resume"]
+```
+
+👉 Ensuite tu n’as qu’à lancer ta VM et exécuter :
+
+```bash
+docker run -v /mnt/nfdata:/mnt/nfdata my_nextflow_pipeline
+```
+
+Tout sera automatique.
+
+---
+
+## 🧠 4. Utiliser un orchestrateur de workflow (optionnel)
+
+Si tu fais souvent tourner ce pipeline sur des VMs temporaires, tu peux automatiser encore plus :
+
+* **Terraform + cloud-init** → crée la VM + exécute `setup.sh` au démarrage
+* **GitHub Actions** ou **Nextflow Tower** → gèrent les exécutions et la reprise automatique sur cloud
+
+---
+
+## 🧩 5. Structure conseillée de ton répertoire
+
+```
+project/
+├── setup.sh
+├── main.nf
+├── nextflow.config
+├── data/
+└── results/
+```
+
+Le dossier `data/` et `results/` doivent pointer vers un espace persistant monté sur la VM (volume Docker, disque cloud, ou stockage réseau).
+
+---
+
+### ✅ En résumé : la solution la plus simple pour toi
+
+1. Crée un script `setup.sh` (comme ci-dessus).
+2. Monte un volume persistant `/mnt/nfdata`.
+3. Utilise `nextflow run ... -resume` pour restaurer ton avancement.
+
+Tu n’auras plus qu’à exécuter **une seule commande** :
+
+```bash
+bash setup.sh
+```
