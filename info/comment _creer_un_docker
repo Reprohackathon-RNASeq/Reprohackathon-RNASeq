@@ -1,0 +1,42 @@
+Créer un Docker (conteneur) concrètement se fait en 3 étapes principales :
+
+- Écrire un fichier Dockerfile
+- Construire l’image Docker avec ce Dockerfile
+- Lancer un conteneur à partir de cette image
+
+Voici comment procéder sur un exemple simple (installation de Python) :
+
+1. Créer un Dockerfile
+Crée un fichier texte nommé Dockerfile (sans extension) avec ce contenu :
+
+text
+# Utilise une image de base officielle
+FROM python:3.10-slim
+
+# Définit le répertoire de travail
+WORKDIR /app
+
+# Copie les fichiers nécessaires dans le conteneur
+COPY . /app
+
+# (Optionnel) Installe des dépendances
+# RUN pip install -r requirements.txt
+
+# Commande à exécuter par défaut
+CMD ["python3"]
+
+2. Construire l’image
+Dans le même dossier que le Dockerfile, ouvre un terminal et lance :
+
+bash
+docker build -t mon_image_python .
+mon_image_python : le nom que tu veux donner à ton image.
+
+3. Lancer le conteneur
+Toujours dans le terminal :
+
+bash
+docker run -it mon_image_python
+Le paramètre -it permet d’ouvrir un terminal interactif.
+
+Pour chaque outil de ton workflow, il suffit d’adapter le Dockerfile : choisir une image de base adaptée (par exemple FROM ubuntu:22.04), installer l’outil avec RUN apt-get install ..., puis copier tes scripts ou tes données si besoin.
