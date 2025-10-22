@@ -1,5 +1,4 @@
 information utiles pour nous :
-caca
 
 Virtual environement :
 Il faut se créer un venv chacun pour le projet (à la racine)
