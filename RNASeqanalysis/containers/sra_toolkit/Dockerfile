@@ -15,6 +15,6 @@ ENV PATH=/usr/local/sratoolkit.3.2.1-ubuntu64/bin:${PATH}
 #docker build -t sra-toolkit .
 #docker run -it sra-toolkit bash
 
-# Vérification (optionnel, pour s'assurer que l'outil est trouvé)
+# Vérification
 #prefetch --version
 #fasterq-dump --version
