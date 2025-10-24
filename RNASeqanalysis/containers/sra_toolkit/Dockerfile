@@ -1,25 +1,22 @@
 FROM ubuntu:22.04
 
-ENV DEBIAN_FRONTEND=noninteractive
+# Installe les outils nécessaires
+RUN apt-get update && apt-get install -y \
+    wget curl tar gzip python3 python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    apt-get install -y pigz wget tar && \
-    wget https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/current/sratoolkit.current-ubuntu22.04-x64.tar.gz && \
-    tar -xzf sratoolkit.current-ubuntu22.04-x64.tar.gz && \
-    mv sratoolkit.* /opt/sratoolkit && \
+# Télécharge et installe le SRA Toolkit (version 3.1.1)
+RUN wget -q https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.1.1/sratoolkit.3.1.1-ubuntu64.tar.gz && \
+    tar -xzf sratoolkit.3.1.1-ubuntu64.tar.gz && \
+    mv sratoolkit.3.1.1-ubuntu64 /opt/sratoolkit && \
     ln -s /opt/sratoolkit/bin/* /usr/local/bin/ && \
-    rm sratoolkit.current-ubuntu22.04-x64.tar.gz
+    rm sratoolkit.3.1.1-ubuntu64.tar.gz
 
+# Crée le dossier de travail
 WORKDIR /data
 
-# Définis l’ID d’étude en variable ENV 
-ENV SRA_PROJECT=SRP227811
-
-# Ajoute un script qui télécharge tous les Runs de l’étude au lancement
+# Copie le script de téléchargement
 COPY download_sra.sh /usr/local/bin/download_sra.sh
+RUN chmod +x /usr/local/bin/download_sra.sh
 
 ENTRYPOINT ["/usr/local/bin/download_sra.sh"]
-
-## Pour run le build:
-# docker build --platform linux/amd64 -t sratoolkit_dl .
-
