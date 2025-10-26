@@ -13,3 +13,6 @@ RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/edirect.tar.gz && \
 
 # Ajout des binaires au PATH
 ENV PATH="/opt/edirect:${PATH}"
+
+#Verification
+RUN entrez-direct --version
