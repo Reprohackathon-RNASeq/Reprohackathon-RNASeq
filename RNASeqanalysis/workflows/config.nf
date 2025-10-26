@@ -34,6 +34,7 @@ dag {
 
 process {
     executor = 'local' 
+    cpus = params.threads ?: 1   // si params.threads n'est pas défini, prend 1 CPU
     //cpus = 2
     //memory = '1 GB'
     maxRetries = 0
@@ -47,3 +48,4 @@ process {
         container="mariemeier/reprohackathon:sra-toolkit"
     }
 }
+
