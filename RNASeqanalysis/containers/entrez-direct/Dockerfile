@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:latest
 
 # Installation de wget et perl
 RUN apt-get update && \
