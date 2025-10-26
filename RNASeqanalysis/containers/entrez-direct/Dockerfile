@@ -1,18 +1,16 @@
 FROM ubuntu:latest
 
-# Installation de wget et perl
+# Installer wget et perl
 RUN apt-get update && \
     apt-get install -y wget perl && \
     apt-get clean
 
-# Installation d'Entrez Direct (esearch / efetch)
+# Installer Entrez Direct dans /usr/local/bin
 RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/edirect.tar.gz && \
     tar -xvzf edirect.tar.gz && \
-    mv edirect /opt/edirect && \
-    rm edirect.tar.gz
+    mv edirect/* /usr/local/bin/ && \
+    rm -rf edirect edirect.tar.gz
 
-# Ajout des binaires au PATH
-ENV PATH="/opt/edirect:${PATH}"
+# Vérification
+RUN esearch -version
 
-#Verification
-RUN entrez-direct --version
