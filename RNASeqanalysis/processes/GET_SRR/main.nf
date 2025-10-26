@@ -5,7 +5,7 @@ process GET_SRR {
     val sra_project
 
     output:
-    path 'SRR_list.txt', emit: srr_list, overwrite: true
+    path 'SRR_list.txt', emit: srr_list
 
     script:
     """
