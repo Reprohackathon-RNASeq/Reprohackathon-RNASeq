@@ -1,4 +1,6 @@
 process GET_SRR {
+    tag "$sra_project"
+
     input:
     val sra_project
 
