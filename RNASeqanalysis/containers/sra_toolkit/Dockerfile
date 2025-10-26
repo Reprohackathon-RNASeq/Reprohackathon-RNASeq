@@ -1,4 +1,4 @@
-#Testé et approuvé !
+#Testé, approuvé et mis sur docker hub!
 
 FROM ubuntu:latest
 
