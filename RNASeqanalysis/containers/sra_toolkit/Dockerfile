@@ -14,3 +14,6 @@ RUN mkdir -p /usr/local/sratoolkit && \
 
 # Ajouter le chemin des binaires au PATH
 ENV PATH=/usr/local/sratoolkit/bin:${PATH}
+
+#Vérification
+RUN fasterq-dump --version
