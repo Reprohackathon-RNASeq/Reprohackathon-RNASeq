@@ -1,0 +1,14 @@
+process GET_SRR {
+    container 'mariemeier/sra-toolkit:latest'
+
+    input:
+    val sra_project
+
+    output:
+    path 'SRR_list.txt', emit: srr_list
+
+    script:
+    """
+    esearch -db sra -query ${sra_project} | efetch -format runinfo | cut -d',' -f1 | grep SRR > SRR_list.txt
+    """
+}
