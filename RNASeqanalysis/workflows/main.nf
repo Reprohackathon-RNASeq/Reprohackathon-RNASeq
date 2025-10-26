@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
-include { GET_SRR } from "./processes/GET_SRR/"
-include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
+include { GET_SRR } from "../processes/GET_SRR/"
+include { DOWNLOAD_FASTQ } from "../processes/DOWNLOAD_FASTQ/"
 
 params.sra_run = null
 params.sra_project = null
@@ -27,3 +27,4 @@ workflow {
 
 
 }
+
