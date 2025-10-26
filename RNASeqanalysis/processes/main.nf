@@ -1,5 +1,5 @@
 process GET_SRR {
-    container 'mariemeier/sra-toolkit:latest'
+    container 'mariemeier/reprohackathon:entrez-direct'
 
     input:
     val sra_project
