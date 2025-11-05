@@ -30,7 +30,7 @@ workflow {
     // 2. Trim Galore sur tous les fastq téléchargés
     TRIM_GALORE(ch_fastq)
 
-// Pour tester trim galore uniquement avec un fichier fastq local, il faut juste mettre le code suivant dans le workflow:
+    // // Pour tester trim galore uniquement avec un fichier fastq local, il faut juste mettre le code suivant dans le workflow:
     // // Chemin de ton fastq existant
     // def fastq_file = "data/fastq/SRR10379721.fastq.gz"
 
