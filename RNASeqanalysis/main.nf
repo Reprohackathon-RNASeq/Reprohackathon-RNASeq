@@ -2,6 +2,7 @@ nextflow.enable.dsl=2
 
 include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
+include { TRIM_GALORE } from './processes/TRIM_GALORE/main.nf'
 
 params.sra_run = null
 params.sra_project = null
@@ -23,7 +24,11 @@ workflow {
         error "Vous devez fournir soit --sra_run, soit --sra_project"
     }
 
-    DOWNLOAD_FASTQ(ch_sra_ids)
+    // 1. Téléchargement des fastq à partir des SRR diffusés
+    def ch_fastq = DOWNLOAD_FASTQ(ch_sra_ids)
+
+    // 2. Trim Galore sur tous les fastq téléchargés
+    TRIM_GALORE(ch_fastq)
 
 
 }
