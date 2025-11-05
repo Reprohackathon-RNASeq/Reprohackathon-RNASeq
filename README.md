@@ -1,8 +1,8 @@
-# 🧫 ReproHackaton - Analyse RNA-Seq de Staphylococcus aureus persisters
+# 🧫 ReproHackathon - Analyse RNA-Seq de Staphylococcus aureus persisters
 
 ## 📋 Description du Projet
 
-Ce projet s'inscrit dans le cadre d'un **ReproHackaton** visant à reproduire l'analyse RNA-Seq de l'article :
+Ce projet s'inscrit dans le cadre d'un **ReproHackathon** visant à reproduire l'analyse RNA-Seq de l'article :
 
 > **"Intracellular Staphylococcus aureus persisters upon antibiotic exposure"**  
 > *Nature Communications* (2020) 11:2200  
