@@ -1,26 +1,26 @@
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 
 RUN apt-get update && apt-get install -y \
     wget \
-    python3 \
+    python3.6 \
+    python3.6-dev \
     python3-pip \
     unzip \
     build-essential \
-    python3-dev \
-    gcc \
-    cutadapt
+    gcc
 
-RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip && \
-    unzip fastqc_v0.11.9.zip && \
-    chmod +x FastQC/fastqc && \
-    mv FastQC/fastqc /usr/local/bin/
+RUN ln -sf python3.6 /usr/bin/python3 && \
+    ln -sf python3.6 /usr/bin/python
 
-RUN wget https://github.com/FelixKrueger/TrimGalore/archive/refs/tags/0.6.10.zip && \
-    unzip 0.6.10.zip && \
-    mv TrimGalore-0.6.10/trim_galore /usr/local/bin/ && \
+RUN python3.6 -m pip install --upgrade pip
+RUN python3.6 -m pip install cutadapt==1.11
+
+RUN wget https://github.com/FelixKrueger/TrimGalore/archive/0.4.4.zip && \
+    unzip 0.4.4.zip && \
+    mv TrimGalore-0.4.4/trim_galore /usr/local/bin/ && \
     chmod +x /usr/local/bin/trim_galore
 
 ENTRYPOINT ["trim_galore"]
 
 # Pour build l'image :
-    #docker build -t trim_galore:latest .
+    # docker build -t trim_galore:latest .
