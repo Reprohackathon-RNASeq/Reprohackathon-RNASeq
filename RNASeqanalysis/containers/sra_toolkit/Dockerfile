@@ -15,3 +15,4 @@ ENV PATH=/usr/local/sratoolkit/bin:${PATH}
 
 # Verification
 RUN fasterq-dump --version
+ 
