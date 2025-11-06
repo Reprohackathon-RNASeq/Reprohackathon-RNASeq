@@ -5,7 +5,7 @@ process GET_REF_GENOME {
     val ref_genome
 
     output:
-    path '', emit: ref_genome_file
+    path 'reference.fasta', emit: ref_genome_file
 
     script:
     """
