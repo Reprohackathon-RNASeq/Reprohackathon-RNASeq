@@ -5,7 +5,7 @@ process INDEX_REF_GENOME {
     path ref_genome
 
   output:
-    path "index_ref_genome/*", emit: indexed_genome
+    path "index_ref_genome", emit: indexed_genome
 
   script:
     """
