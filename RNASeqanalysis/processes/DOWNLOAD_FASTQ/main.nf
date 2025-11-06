@@ -27,8 +27,13 @@ process DOWNLOAD_FASTQ {
         echo "Running in TEST MODE — keeping only first 10,000 reads"
         zcat ${sra_id}.fastq.gz | head -n 10000 | gzip > ${sra_id}_test.fastq.gz
         mv ${sra_id}_test.fastq.gz ${sra_id}.fastq.gz
+        
+    else
+        # Mode Normal : Conversion et compression (seulement si le mode test n'est pas actif).
+        fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
+        gzip ${sra_id}.fastq
     fi
-    
-    echo "Downloading over: ${sra_id}"
+
+    echo "DOWNLOADING completed: ${sra_id}"
     """
 }

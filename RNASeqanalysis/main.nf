@@ -10,8 +10,6 @@ include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 params.sra_run = null
 params.sra_project = null
 params.ref_genome = null
-params.indexed_genome = null
-params.mapping= null
 
 workflow {
 
@@ -44,3 +42,4 @@ workflow {
     // Map the trimmed sequences to the reference genome
     ch_mapping = MAPPING_BOWTIE(ch_trimmed_sequences.combine(ch_indexed_genome))
 }
+
