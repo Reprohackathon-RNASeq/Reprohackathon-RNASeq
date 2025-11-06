@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sudo apt-get update
 sudo apt install python3.10-venv
 sudo apt install openjdk-17-jre -y
