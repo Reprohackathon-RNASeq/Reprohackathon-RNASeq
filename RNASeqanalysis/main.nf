@@ -3,9 +3,9 @@ nextflow.enable.dsl=2
 include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
 include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
-include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/main"
-include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/main"
-include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/main" 
+include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/" 
+include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
+include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 
 params.sra_run = null
 params.sra_project = null

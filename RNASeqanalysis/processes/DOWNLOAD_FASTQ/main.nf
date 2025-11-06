@@ -11,8 +11,14 @@ process DOWNLOAD_FASTQ {
 
     script:
     """
-    echo "Téléchargement FASTQ pour ${sra_id}"
+    echo "DOWNLOADING FASTQ for ${sra_id}"
     prefetch ${sra_id}
+
+
+ if [ "${params.test}" == "true" ]; then
+    # Mode Test : Tronque et compresse.
+    echo "Running in TEST MODE — keeping only first 10,000 reads"
+    
     fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
     gzip ${sra_id}.fastq 
 

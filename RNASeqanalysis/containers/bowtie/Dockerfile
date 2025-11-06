@@ -14,8 +14,5 @@ RUN mkdir /usr/local/bowtie && \
 # Add the binary path to the PATH
 ENV PATH="/usr/local/bowtie:/usr/local/bowtie/bowtie-0.12.7:${PATH}"
 
-# Vérification du contenu
-RUN ls -R /usr/local/bowtie
-
-# Vérification de l'installation
-RUN /usr/local/bowtie/bowtie-0.12.7/bowtie --version
+# Verification
+RUN bowtie --version
