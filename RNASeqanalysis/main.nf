@@ -42,5 +42,5 @@ workflow {
     ch_indexed_genome = INDEX_REF_GENOME(ch_ref_genome).indexed_genome
 
     // Map the trimmed sequences to the reference genome
-    ch_mapping = MAPPING_BOWTIE(ch_indexed_genome, ch_trimmed_sequences)
+    ch_mapping = MAPPING_BOWTIE(ch_trimmed_sequences.combine(ch_indexed_genome))
 }
