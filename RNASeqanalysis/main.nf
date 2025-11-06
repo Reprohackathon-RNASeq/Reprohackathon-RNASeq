@@ -3,9 +3,11 @@ nextflow.enable.dsl=2
 include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
 include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
+include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/main" 
 
 params.sra_run = null
 params.sra_project = null
+params.ref_genome = null
 
 workflow {
 
@@ -28,4 +30,8 @@ workflow {
 
     // Trim the downloaded FASTQ files
     TRIM_SEQUENCE(ch_fastq_files)
+
+    // Get the reference genome
+    ch_ref_genome = GET_REF_GENOME(params.ref_genome).ref_genome_file
+
 }
