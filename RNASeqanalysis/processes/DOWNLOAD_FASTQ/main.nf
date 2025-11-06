@@ -11,7 +11,7 @@ process DOWNLOAD_FASTQ {
 
     script:
     """
-    echo "DOWNLOADING FASTQ for ${sra_id}"
+    echo "Téléchargement FASTQ pour ${sra_id}"
     prefetch ${sra_id}
 
 
@@ -22,13 +22,13 @@ process DOWNLOAD_FASTQ {
     fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
     gzip ${sra_id}.fastq 
 
-    # Si le mode test est activé, tronquer le fichier à 10 000 lectures
+    # If the test mode is activated using --test true, truncate the file to 10,000 reads
     if [ "${params.test}" = "true" ]; then
         echo "Running in TEST MODE — keeping only first 10,000 reads"
-        zcat ${sra_id}.fastq.gz | head -n 40000 | gzip > ${sra_id}_test.fastq.gz
+        zcat ${sra_id}.fastq.gz | head -n 10000 | gzip > ${sra_id}_test.fastq.gz
         mv ${sra_id}_test.fastq.gz ${sra_id}.fastq.gz
     fi
     
-    echo "Téléchargement terminé : ${sra_id}"
+    echo "Downloading over: ${sra_id}"
     """
 }
