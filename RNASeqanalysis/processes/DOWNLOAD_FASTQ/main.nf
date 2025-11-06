@@ -15,7 +15,7 @@ process DOWNLOAD_FASTQ {
     prefetch ${sra_id}
 
 
- if [ "${params.test}" == "true" ]; then
+    if [ "${params.test}" == "true" ]; then
     # Mode Test : Tronque et compresse.
     echo "Running in TEST MODE — keeping only first 10,000 reads"
     
