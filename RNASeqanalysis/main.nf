@@ -2,45 +2,30 @@ nextflow.enable.dsl=2
 
 include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
-include { TRIM_GALORE } from './processes/TRIM_GALORE/main.nf'
+include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
 
 params.sra_run = null
 params.sra_project = null
 
 workflow {
 
-    def ch_sra_ids
-
+    // Define the channel for SRA IDs based on the parameters provided (sra_run ou sra_project)
     if (params.sra_run) {
         ch_sra_ids = Channel.value(params.sra_run)
 
     } else if (params.sra_project) {
-        ch_sra_ids = GET_SRR(params.sra_project)
+        ch_sra_ids = GET_SRR(params.sra_project).srr_list
             .map { file ->
                 file.text.readLines().collect { it.trim() }
             }
             .flatten()
     } else {
-        error "Vous devez fournir soit --sra_run, soit --sra_project"
+        error "You must provide either --sra_run or --sra_project."
     }
 
-    // 1. Téléchargement des fastq à partir des SRR diffusés
-    def ch_fastq = DOWNLOAD_FASTQ(ch_sra_ids)
+    // Download the FASTQ files for all SRA IDs
+    ch_fastq_files = DOWNLOAD_FASTQ(ch_sra_ids).fastq_files 
 
-    // 2. Trim Galore sur tous les fastq téléchargés
-    TRIM_GALORE(ch_fastq)
-
-    // // Pour tester trim galore uniquement avec un fichier fastq local, il faut juste mettre le code suivant dans le workflow:
-    // // Chemin de ton fastq existant
-    // def fastq_file = "data/fastq/SRR10379721.fastq.gz"
-
-    // // Channel Nextflow attendue par TRIM_GALORE
-    // def ch_fastq = Channel.of( tuple("SRR10379721", file(fastq_file)) )
-
-    // // Trim direct du fichier fastq existant
-    // TRIM_GALORE(ch_fastq)
-
-    // et pour run, faut faire: nextflow run main.nf
+    // Trim the downloaded FASTQ files
+    TRIM_SEQUENCE(ch_fastq_files)
 }
-
-
