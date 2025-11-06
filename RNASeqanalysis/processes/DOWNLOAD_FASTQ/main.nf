@@ -11,10 +11,26 @@ process DOWNLOAD_FASTQ {
 
     script:
     """
-    echo "Téléchargement FASTQ pour ${sra_id}"
+    echo "DOWNLOADING FASTQ for ${sra_id}"
     prefetch ${sra_id}
+
+
+ if [ "${params.test}" == "true" ]; then
+    # Mode Test : Tronque et compresse.
+    echo "Running in TEST MODE — keeping only first 10,000 reads"
+    
     fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
-    gzip ${sra_id}.fastq 
-    echo "Téléchargement terminé : ${sra_id}"
+    gzip ${sra_id}.fastq
+    
+    zcat ${sra_id}.fastq.gz | head -n 40000 | gzip > ${sra_id}_test.fastq.gz
+    mv ${sra_id}_test.fastq.gz ${sra_id}.fastq.gz
+    
+else
+    # Mode Normal : Conversion et compression (seulement si le mode test n'est pas actif).
+    fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
+    gzip ${sra_id}.fastq
+fi
+
+    echo "DOWNLOADING completed: ${sra_id}"
     """
 }

@@ -2,18 +2,15 @@ process TRIM_SEQUENCE {
   publishDir "results/trimmed", mode: 'copy', overwrite: true
 
   input:
-    path ch_fastq_files
+    path fastq_files
 
   output:
     path "*_trimmed.fq.gz"
 
   script:
     """
-    # Remove .gz extension
-    BASENAME=\$(basename ${ch_fastq_files} .gz)
-
-    # Remove .fastq extension to get SRA ID
-    SRA_ID=\${BASENAME%.fastq}
+    # Remove .gz extension and .fastq extension to get SRA ID
+    SRA_ID=\$(basename ${fastq_files} .fastq.gz)
 
     trim_galore -q 20 --phred33 --length 25 \${SRA_ID}.fastq.gz 
 

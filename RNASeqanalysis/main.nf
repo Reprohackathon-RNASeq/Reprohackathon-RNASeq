@@ -3,7 +3,9 @@ nextflow.enable.dsl=2
 include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
 include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
-include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/main" 
+include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/" 
+include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
+include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 
 params.sra_run = null
 params.sra_project = null
@@ -29,9 +31,14 @@ workflow {
     ch_fastq_files = DOWNLOAD_FASTQ(ch_sra_ids).fastq_files 
 
     // Trim the downloaded FASTQ files
-    TRIM_SEQUENCE(ch_fastq_files)
+    ch_trimmed_sequences = TRIM_SEQUENCE(ch_fastq_files)
 
     // Get the reference genome
     ch_ref_genome = GET_REF_GENOME(params.ref_genome).ref_genome_file
 
+    // Index genome with bowtie
+    ch_indexed_genome = INDEX_REF_GENOME(ch_ref_genome)
+
+    // Map the trimmed sequences to the reference genome
+    ch_mapping = MAPPING_BOWTIE(ch_indexed_genome, ch_trimmed_sequences)
 }
