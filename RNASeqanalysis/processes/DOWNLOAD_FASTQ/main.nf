@@ -16,7 +16,7 @@ process DOWNLOAD_FASTQ {
 
 
     if [ "${params.test}" == "true" ]; then
-    # Mode Test : Tronque et compresse.
+    # Test mode
     echo "Running in TEST MODE — keeping only first 10,000 reads"
     
     fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
