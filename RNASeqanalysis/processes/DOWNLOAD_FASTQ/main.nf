@@ -11,7 +11,7 @@ process DOWNLOAD_FASTQ {
 
     script:
     """
-    echo "Téléchargement FASTQ pour ${sra_id}"
+    echo "Downloading FASTQ for ${sra_id}"
     prefetch ${sra_id}
 
 
