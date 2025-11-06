@@ -1,4 +1,6 @@
 process DOWNLOAD_FASTQ {
+    publishDir "data/fastq", mode: 'copy', overwrite: true
+    
     tag "$sra_id"
 
     input:
@@ -6,8 +8,6 @@ process DOWNLOAD_FASTQ {
     
     output:
     path "${sra_id}.fastq.gz", emit: fastq_files
-
-    publishDir "data/fastq", mode: 'copy', overwrite: true
 
     script:
     """

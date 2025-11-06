@@ -1,13 +1,11 @@
-#Testé, approuvé et mis sur docker hub!
-
 FROM ubuntu:latest
 
-# Installer wget et perl
+# Install the necessary dependencies
 RUN apt-get update && \
     apt-get install -y wget perl && \
     apt-get clean
 
-# Installer Entrez Direct dans /usr/local/bin
+# Install Entrez Direct in /usr/local/bin
 RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/edirect.tar.gz && \
     tar -xvzf edirect.tar.gz && \
     mkdir -p /usr/local/entrez-direct/bin && \
@@ -16,5 +14,5 @@ RUN wget ftp://ftp.ncbi.nlm.nih.gov/entrez/entrezdirect/edirect.tar.gz && \
 
 ENV PATH="/usr/local/entrez-direct/bin:${PATH}"
 
-# Vérification
+# Verification
 RUN esearch -version
