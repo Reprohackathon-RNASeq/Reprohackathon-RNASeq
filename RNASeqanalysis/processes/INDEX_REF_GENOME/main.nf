@@ -9,7 +9,9 @@ process INDEX_REF_GENOME {
 
   script:
     """
+    # Create output directory for the index
     mkdir -p index_ref_genome
+    # apply bowtie-build to index the reference genome
     bowtie-build ${ref_genome} index_ref_genome/indexed_ref_genome
     """
 }
