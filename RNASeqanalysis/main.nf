@@ -2,9 +2,12 @@ nextflow.enable.dsl=2
 
 include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
+include { QUALITY_FASTQ } from "./processes/QUALITY_FASTQ/"
 include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
-include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/main" 
-include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/main" 
+include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/" 
+include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
+include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
+include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/
 
 params.sra_run = null
 params.sra_project = null
@@ -29,12 +32,18 @@ workflow {
     // Download the FASTQ files for all SRA IDs
     ch_fastq_files = DOWNLOAD_FASTQ(ch_sra_ids).fastq_files 
 
-    // Trim the downloaded FASTQ files
-    ch_trimmed_seq = TRIM_SEQUENCE(ch_fastq_files)
+    // Perform quality check on the downloaded FASTQ files
+    //QUALITY_FASTQ(ch_fastq_files)
 
-    FEATURECOUNTS(ch_trimmed_seq)
+    // Trim the downloaded FASTQ files
+    ch_trimmed_sequences = TRIM_SEQUENCE(ch_fastq_files)
 
     // Get the reference genome
     ch_ref_genome = GET_REF_GENOME(params.ref_genome).ref_genome_file
 
+    // Index genome with bowtie
+    ch_indexed_genome = INDEX_REF_GENOME(ch_ref_genome).indexed_genome
+
+    // Map the trimmed sequences to the reference genome
+    ch_mapping = MAPPING_BOWTIE(ch_trimmed_sequences.combine(ch_indexed_genome))
 }
