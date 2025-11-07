@@ -2,14 +2,14 @@ process MAPPING_BOWTIE {
   publishDir "results/mapping", mode: 'copy', overwrite: true
 
   input:
-    path indexed_genome
-    path trimmed_fastq
+    tuple path(trimmed_fastq), path(indexed_genome)
 
   output:
-    path "*.sam", emit: mapped_reads
+    path "*.map", emit: mapped_reads
 
   script:
     """
-    bowtie -x ${indexed_genome}/indexed_ref_genome -U ${trimmed_fastq} -S \$(basename ${trimmed_fastq} .fq.gz).sam
+    gunzip -c ${trimmed_fastq} > reads.fastq
+    bowtie ./index_ref_genome/indexed_ref_genome reads.fastq > ${trimmed_fastq.baseName.replace('.fq.gz','')}.map
     """
 }
