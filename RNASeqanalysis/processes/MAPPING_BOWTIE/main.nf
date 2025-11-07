@@ -4,7 +4,6 @@ process MAPPING_BOWTIE {
   input:
     tuple path(trimmed_fastq), path(indexed_genome)
 
-
   output:
     path "*.map", emit: mapped_reads
 

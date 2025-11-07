@@ -14,18 +14,15 @@ process DOWNLOAD_FASTQ {
     echo "Downloading FASTQ for ${sra_id}"
     prefetch ${sra_id}
 
-
+    #A ENLEVER A LA FIN DES TESTS
     if [ "${params.test}" == "true" ]; then
-    # Test mode
-    echo "Running in TEST MODE — keeping only first 10,000 reads"
-    
-    fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
-    gzip ${sra_id}.fastq 
-
-    # If the test mode is activated using --test true, truncate the file to 10,000 reads
-    if [ "${params.test}" = "true" ]; then
+        # Mode Test : Tronque et compresse.
         echo "Running in TEST MODE — keeping only first 10,000 reads"
-        zcat ${sra_id}.fastq.gz | head -n 10000 | gzip > ${sra_id}_test.fastq.gz
+        
+        fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
+        gzip ${sra_id}.fastq
+        
+        zcat ${sra_id}.fastq.gz | head -n 40000 | gzip > ${sra_id}_test.fastq.gz
         mv ${sra_id}_test.fastq.gz ${sra_id}.fastq.gz
         
     else
