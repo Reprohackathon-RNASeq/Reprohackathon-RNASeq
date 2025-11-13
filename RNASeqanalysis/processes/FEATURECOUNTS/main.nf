@@ -1,4 +1,4 @@
-process TRIM_SEQUENCE {
+process FEATURECOUNTS {
   publishDir "results/counted", mode: 'copy', overwrite: true
 
   input:
