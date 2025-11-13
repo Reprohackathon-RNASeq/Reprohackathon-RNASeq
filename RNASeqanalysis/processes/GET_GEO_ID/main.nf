@@ -12,6 +12,6 @@ process GET_GEO_ID {
         esummary | \
         xtract -pattern DocumentSummary -element Accession)
         
-    echo \$GEO_ACCESSION
+    echo \$GEO_ACCESSION > geo_id
     """
 }
