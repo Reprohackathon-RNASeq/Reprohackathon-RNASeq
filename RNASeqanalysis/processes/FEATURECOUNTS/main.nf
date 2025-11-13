@@ -1,16 +1,16 @@
 process FEATURECOUNTS {
-  publishDir "results/counted", mode: 'copy', overwrite: true
+  publishDir "results/count_matrix", mode: 'copy', overwrite: true
 
   input:
-    path ch_trimmed_seq
+    path mapped_reads
+    path gff_file
 
   output:
-    path "*__counted.fq.gz"
+    path "counts.txt", emit: count_matrix // The final count matrix
+    path "*.summary", emit: counts_summary // Summary file for each sample
 
-    // paramètres utilisés -t gene -g ID -s 1
   script:
     """
-    featureCounts -o __counted.fq.gz -t gene -g ID -s 1 
-
+    featureCounts -t gene -g ID -s 1 -a ${gff_file} -o counts.txt ${mapped_reads}
     """
 }
