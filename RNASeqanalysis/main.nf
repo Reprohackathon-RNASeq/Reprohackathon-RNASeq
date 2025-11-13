@@ -7,7 +7,7 @@ include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
 include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/" 
 include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
 include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
-include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/
+include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
 
 params.sra_run = null
 params.sra_project = null
@@ -47,3 +47,4 @@ workflow {
     // Map the trimmed sequences to the reference genome
     ch_mapping = MAPPING_BOWTIE(ch_trimmed_sequences.combine(ch_indexed_genome))
 }
+
