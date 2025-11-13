@@ -38,7 +38,7 @@ workflow {
     // Trim the downloaded FASTQ files
     ch_trimmed_sequences = TRIM_SEQUENCE(ch_fastq_files)
 
-    // Get the reference genome
+    // Get the reference genome and annotations
     ch_data_genome = GET_DATA_GENOME(params.ref_genome)
     ch_ref_genome = ch_data_genome.ref_genome_file
     ch_annotations = ch_data_genome.gff_gile
