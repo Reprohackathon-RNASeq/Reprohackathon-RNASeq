@@ -1,4 +1,4 @@
-process GET_REF_GENOME {
+process GET_DATA_GENOME {
     publishDir "data/ref_genome", mode: 'copy', overwrite: true
 
     input:
@@ -6,9 +6,11 @@ process GET_REF_GENOME {
 
     output:
     path 'reference.fasta', emit: ref_genome_file
+    path 'annotation.gff', emit: gff_gile
 
     script:
     """
     esearch -db nucleotide -query $ref_genome | efetch -format fasta > reference.fasta
+    esearch -db nuccore -query $ref_genome | efetch -format gff3 > annotation.gff
     """
 }
