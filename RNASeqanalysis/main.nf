@@ -4,7 +4,7 @@ include { GET_SRR } from "./processes/GET_SRR/"
 include { DOWNLOAD_FASTQ } from "./processes/DOWNLOAD_FASTQ/"
 include { QUALITY_FASTQ } from "./processes/QUALITY_FASTQ/"
 include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
-include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/" 
+include { GET_DATA_GENOME } from "./processes/GET_REF_GENOME/" 
 include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
 include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
@@ -39,7 +39,9 @@ workflow {
     ch_trimmed_sequences = TRIM_SEQUENCE(ch_fastq_files)
 
     // Get the reference genome
-    ch_ref_genome = GET_REF_GENOME(params.ref_genome).ref_genome_file
+    ch_data_genome = GET_DATA_GENOME(params.ref_genome)
+    ch_ref_genome = ch_data_genome.ref_genome_file
+    ch_annotations = ch_data_genome.gff_gile
 
     // Index genome with bowtie
     ch_indexed_genome = INDEX_REF_GENOME(ch_ref_genome).indexed_genome
@@ -47,4 +49,3 @@ workflow {
     // Map the trimmed sequences to the reference genome
     ch_mapping = MAPPING_BOWTIE(ch_trimmed_sequences.combine(ch_indexed_genome))
 }
-
