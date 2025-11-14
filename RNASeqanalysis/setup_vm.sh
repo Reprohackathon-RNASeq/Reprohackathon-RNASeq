@@ -20,7 +20,7 @@ python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-nextflow run main.nf --sra_run SRR10379726 --ref_genome CP000253.1 --test true
+nextflow run main.nf --sra_run SRP227811 --ref_genome CP000253.1 --test true
 
 
 
