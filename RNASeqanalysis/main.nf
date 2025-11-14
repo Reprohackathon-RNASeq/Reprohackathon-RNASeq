@@ -11,11 +11,6 @@ include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
 include { GET_GEO_ID } from "./processes/GET_GEO_ID/"
 include { GET_SRA_DATA } from "./processes/GET_SRA_DATA/"
 
-params.sra_run = null
-params.sra_project = null
-params.ref_genome = null
-params.test = false
-
 workflow {
 
     // Define the channel for SRA IDs based on the parameters provided (sra_run ou sra_project)
@@ -61,4 +56,5 @@ workflow {
         GET_SRA_DATA(params.sra_project).sra_data_file
     }
 }
+
 
