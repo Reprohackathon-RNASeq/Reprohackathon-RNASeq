@@ -7,7 +7,8 @@ include { TRIM_SEQUENCE } from "./processes/TRIM_SEQUENCE/"
 include { GET_REF_GENOME } from "./processes/GET_REF_GENOME/" 
 include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
 include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
-include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/
+include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
+include { DESEQ2_ANALYSIS } from './processes/DESEQ2_ANALYSIS/'
 
 params.sra_run = null
 params.sra_project = null
@@ -49,5 +50,8 @@ workflow {
 
     // COOUNT FEATURES 
     counted = FEATURECOUNTS(ch_mapping)
+
+    //ANALYSIS
+    deseq2_result = DESEQ2_ANALYSIS(counted.out, file('scripts/traitement_stat.R'))
 }
 
