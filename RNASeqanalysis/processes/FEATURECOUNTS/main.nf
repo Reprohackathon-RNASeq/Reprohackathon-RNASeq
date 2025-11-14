@@ -1,4 +1,6 @@
 process FEATURECOUNTS {
+  cpus = 3 
+  
   publishDir "results/count_matrix", mode: 'copy', overwrite: true
 
   input:

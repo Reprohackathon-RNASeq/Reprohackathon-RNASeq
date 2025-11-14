@@ -1,4 +1,6 @@
 process MAPPING_BOWTIE {
+  cpus = 3 
+  
   publishDir "results/mapping", mode: 'copy', overwrite: true
 
   input:

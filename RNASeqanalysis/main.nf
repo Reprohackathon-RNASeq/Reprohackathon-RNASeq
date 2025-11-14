@@ -9,6 +9,7 @@ include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
 include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
 include { GET_GEO_ID } from "./processes/GET_GEO_ID/"
+include { GET_SRA_DATA } from "./processes/GET_SRA_MAPPING/"
 
 params.sra_run = null
 params.sra_project = null
@@ -57,6 +58,6 @@ workflow {
     // Get GEO ID from SRA Project
     if (params.sra_project) {
         ch_geo_id = GET_GEO_ID(params.sra_project).geo_id_channel
+        GET_SRA_DATA(params.sra_project).sra_data_file
     }
 }
-
