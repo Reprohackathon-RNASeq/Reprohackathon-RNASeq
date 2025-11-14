@@ -22,7 +22,7 @@ process DOWNLOAD_FASTQ {
         fasterq-dump --threads ${task.cpus} --progress ${sra_id} 
         gzip ${sra_id}.fastq
         
-        zcat ${sra_id}.fastq.gz | head -n 40000 | gzip > ${sra_id}_test.fastq.gz
+        zcat ${sra_id}.fastq.gz | head -n 10000 | gzip > ${sra_id}_test.fastq.gz
         mv ${sra_id}_test.fastq.gz ${sra_id}.fastq.gz
         
     else
