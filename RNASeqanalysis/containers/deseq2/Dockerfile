@@ -51,8 +51,8 @@ RUN R -e "install.packages('BiocInstaller', repos = 'https://bioconductor.org/pa
 RUN R -e "BiocInstaller::biocLite('graph')"
 
 # Téléchargement de Rgraphviz à la source 
-# Ce package est problématique à installer en utilisant biocLite (il a du mal à trouver un header file), cette manière d'installer résout le problème
-RUN curl -O https://www.bioconductor.org/packages/release/bioc/src/contrib/Rgraphviz_2.50.0.tar.gz && tar -xzf Rgraphviz_2.50.0.tar.gz && rm Rgraphviz_2.50.0.tar.gz
+# Ce package est problématique à installer ne utilisant biocLite (il a du mal à trouver un header file), cette manière d'installer résout le problème
+RUN curl -O https://www.bioconductor.org/packages/release/bioc/src/contrib/Rgraphviz_2.54.0.tar.gz && tar -xzf Rgraphviz_2.54.0.tar.gz && rm Rgraphviz_2.54.0.tar.gz
 
 # Installation depuis la source
 RUN R -e "install.packages('Rgraphviz/', repos = NULL, type='source')" && rm -rf Rgraphviz
@@ -61,4 +61,4 @@ RUN R -e "install.packages('Rgraphviz/', repos = NULL, type='source')" && rm -rf
 # Les version sont : DESeq2 1.16.1
 RUN R -e "options(repos = c(CRAN = 'https://packagemanager.posit.co/cran/__linux__/focal/2018-01-11')) ; BiocInstaller::biocLite('DESeq2')"
 
-# RUN Rscript -e 'library("DESeq2")'
+RUN Rscript -e 'library("DESeq2")'
