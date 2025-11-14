@@ -9,7 +9,7 @@ include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
 include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
 include { GET_GEO_ID } from "./processes/GET_GEO_ID/"
-include { GET_SRA_DATA } from "./processes/GET_SRA_MAPPING/"
+include { GET_SRA_DATA } from "./processes/GET_SRA_DATA/"
 
 params.sra_run = null
 params.sra_project = null
@@ -61,3 +61,4 @@ workflow {
         GET_SRA_DATA(params.sra_project).sra_data_file
     }
 }
+
