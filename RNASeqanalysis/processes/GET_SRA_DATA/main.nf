@@ -1,16 +1,14 @@
-process GET_DATA_GENOME {
-    publishDir "data/ref_genome", mode: 'copy', overwrite: true
-
+process GET_SRA_DATA {
+    publishDir "data/sra_data_raw", mode: 'copy', overwrite: true
+    
     input:
-    val ref_genome
+    val sra_project 
 
     output:
-    path 'reference.fasta', emit: ref_genome_file
-    path 'annotation.gff', emit: gff_gile
+    path 'sra_data_complete.csv', emit: sra_data_file 
 
     script:
-    """
-    esearch -db nucleotide -query $ref_genome | efetch -format fasta > reference.fasta
-    esearch -db nuccore -query $ref_genome | efetch -format gff3 > annotation.gff
+    """ 
+    esearch -db sra -query "${sra_project}" | efetch -format runinfo > "sra_data_complete.csv"
     """
 }
