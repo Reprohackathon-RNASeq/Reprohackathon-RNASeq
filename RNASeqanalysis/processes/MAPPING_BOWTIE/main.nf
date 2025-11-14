@@ -5,11 +5,11 @@ process MAPPING_BOWTIE {
     tuple path(trimmed_fastq), path(indexed_genome)
 
   output:
-    path "*.map", emit: mapped_reads
+    path "*.sam", emit: mapped_reads
 
   script:
     """
-    gunzip -c ${trimmed_fastq} > reads.fastq
-    bowtie ./index_ref_genome/indexed_ref_genome reads.fastq > ${trimmed_fastq.baseName.replace('.fq.gz','')}.map
+    # Unzip directly and map with Bowtie
+    gunzip -c ${trimmed_fastq} | bowtie -S ./index_ref_genome/indexed_ref_genome - > ${trimmed_fastq.baseName.replace('.fq.gz','')}.sam
     """
 }
