@@ -1,4 +1,6 @@
 process INDEX_REF_GENOME {
+  cpus = 2
+  
   publishDir "results/index", mode: 'copy', overwrite: true
 
   input:
