@@ -9,6 +9,7 @@ include { INDEX_REF_GENOME } from "./processes/INDEX_REF_GENOME/"
 include { MAPPING_BOWTIE } from "./processes/MAPPING_BOWTIE/"
 include { FEATURECOUNTS } from "./processes/FEATURECOUNTS/"
 include { GET_GEO_ID } from "./processes/GET_GEO_ID/"
+include { DESEQ2_ANALYSIS } from './processes/DESEQ2_ANALYSIS/'
 
 params.sra_run = null
 params.sra_project = null
@@ -58,5 +59,8 @@ workflow {
     if (params.sra_project) {
         ch_geo_id = GET_GEO_ID(params.sra_project).geo_id_channel
     }
+
+    //ANALYSIS (inputs à changer)
+    deseq2_result = DESEQ2_ANALYSIS(ch_geo_id, file('scripts/traitement_stat.R'))
 }
 
