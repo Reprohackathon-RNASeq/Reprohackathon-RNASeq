@@ -7,11 +7,14 @@ process MAPPING_BOWTIE {
     tuple path(trimmed_fastq), path(indexed_genome)
 
   output:
-    path "*.sam", emit: mapped_reads
+    path "*.bam", emit: mapped_reads
 
   script:
+    def srr_id = trimmed_fastq.baseName.replaceAll('_trimmed.fq.gz', '').replaceAll('_trimmed.fq', '')
     """
     # Unzip directly and map with Bowtie
-    gunzip -c ${trimmed_fastq} | bowtie -S ./index_ref_genome/indexed_ref_genome - > ${trimmed_fastq.baseName.replace('.fq.gz','')}.sam
+    gunzip -c ${trimmed_fastq} | \
+    bowtie -S ./index_ref_genome/indexed_ref_genome - | \
+    samtools view -@ ${task.cpus} -bS -o ${srr_id}.bam
     """
 }
