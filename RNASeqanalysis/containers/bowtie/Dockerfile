@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 # Install the necessary dependencies
 RUN apt-get update && \
-    apt-get install --yes --quiet curl tar gzip uuid-runtime perl wget unzip && \
+    apt-get install --yes --quiet curl tar gzip uuid-runtime perl wget unzip samtools&& \
     apt-get clean 
 
 # Download and install the version of Bowtie required
@@ -16,3 +16,4 @@ ENV PATH="/usr/local/bowtie:/usr/local/bowtie/bowtie-0.12.7:${PATH}"
 
 # Verification
 RUN bowtie --version
+RUN samtools --version
