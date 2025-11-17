@@ -1,15 +1,16 @@
 ###############################################################################
 # GET COLDATA
 ###############################################################################
+
+# Load required libraries
 library(GEOquery)
 library(dplyr)
 library(stringr)
 library(readr) 
 library(tibble)
 
-args <- commandArgs(trailingOnly = TRUE)
-
 # Expect 3 arguments: geo_id file, sra file, output file
+args <- commandArgs(trailingOnly = TRUE)
 geo_file_path <- args[1]
 sra_file_path <- args[2]
 output_file <- args[3]
