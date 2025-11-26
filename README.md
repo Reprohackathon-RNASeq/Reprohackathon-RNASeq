@@ -1,122 +1,36 @@
-# 🧫 ReproHackathon - Analyse RNA-Seq de Staphylococcus aureus persisters
+# ReproHackathon - RNA-Seq Analysis of Staphylococcus aureus persisters
 
-## 📋 Description du Projet
+## 📑 Project Description
 
-Ce projet s'inscrit dans le cadre d'un **ReproHackathon** visant à reproduire l'analyse RNA-Seq de l'article :
+This project is part of a **ReproHackathon** aiming to reproduce the RNA-Seq analysis from the article:
 
 > **"Intracellular Staphylococcus aureus persisters upon antibiotic exposure"**  
 > *Nature Communications* (2020) 11:2200  
 > DOI: [10.1038/s41467-020-15966-7](https://doi.org/10.1038/s41467-020-15966-7)
 
-### 🎯 Objectif Scientifique
-Analyser les gènes différentiellement exprimés chez les **persisters intracellulaires** de *Staphylococcus aureus* après exposition aux antibiotiques, comparés aux bactéries contrôles.
+Analysing RNA-Seq data to identify differentially expressed genes in intracellular persister cells of *Staphylococcus aureus* after antibiotic treatment.
+    
+## 🧬 Biological Context
 
-## 🧬 Contexte Biologique
+Bacterial **persisters** are phenotypic variants that:
+- Enter a **transient non-dividing state**
+- Develop **antibiotic tolerance**
+- Contribute to **chronic infections** and **therapeutic failures**
+- Constitute a **reservoir for relapses**
 
-Les **persisters bactériens** sont des variants phénotypiques qui :
-- Entrent dans un état **non-divisant transitoire**
-- Développent une **tolérance aux antibiotiques**
-- Contribuent aux **infections chroniques** et aux **échecs thérapeutiques**
-- Constituent un **réservoir pour les rechutes**
+### 📊 RNA-Seq Analysis Pipeline Overview
+![Pipeline Overview](assets/pipeline.png)
+FASTQ Download → Quality Check → Trimming → Mapping → Counting → Statistical Analysis
 
-## 🛠️ Workflow Implementé
+## 🚀 Installation and Execution
+    
+### Prerequisites
 
-### 📊 Pipeline d'Analyse RNA-Seq
+### Execution
 
-Téléchargement FASTQ (SRA) → Trimming → Mapping → Comptage → Analyse Différentielle
+## Contributors
 
-### 🔧 Outils Utilisés
-
-| Étape | Outil | Version | Conteneur |
-|-------|-------|---------|-----------|
-| Téléchargement | `fasterq-dump` | 3.0.7 | ✅ |
-| Qualité | `FastQC` | 0.12.1 | ✅ |
-| Trimming | `TrimGalore` | 0.6.10 | ✅ |
-| Mapping | `Bowtie2` | 2.5.1 | ✅ |
-| Comptage | `featureCounts` | 2.0.3 | ✅ |
-| Analyse DESeq2 | `R` + `DESeq2` | 4.3.1 | ✅ |
-
-## 🗂️ Structure du Projet
-
-projet_reprohackaton/
-├── workflows/
-│ ├── nextflow.nf # Workflow
-│ └── config.nf # Configuration
-├── containers/
-├── scripts/
-├── data/
-├── results/
-├── README.md
-├── run.sh # Script d'exécution
-├── .gitignore
-└── requirements.txt # venv python
-
-
-## 🚀 Installation et Exécution
-
-### Prérequis
-```bash
-# 1. Installer Conda/Mamba
-conda install -c conda-forge mamba
-
-# 2. Installer Snakemake
-mamba create -c conda-forge -c bioconda -n snakemake snakemake
-conda activate snakemake
-
-# 3. Cloner le repository
-git clone https://github.com/Reprohackaton-RNASeq/Reprohackaton-RNASeq.git
-cd projet_reprohackaton
-```
-### Exécution rapide 
-```bash
-# Lancer tout le workflow
-./run.sh
-
-# Ou exécuter manuellement
-snakemake --use-conda --cores 8 --resources mem_mb=16000
-```
-### Avec docker
-```bash
-# Build des conteneurs
-docker build -t reprohackaton-rnaseq -f containers/Dockerfile.rnaseq .
-
-# Exécution
-docker run -v $(pwd)/data:/data reprohackaton-rnaseq
-```
-
-## 📊 Résultats Attendus
-
-### 🔍 Sorties Principales
-
-Matrice de comptage des reads par gène
-Liste des gènes différentiellement exprimés (padj < 0.05)
-MA-plots et volcano plots de visualisation
-Heatmaps des profils d'expression
-Enrichissement fonctionnel (voies KEGG)
-
-### 🧪 Validation Reproductible
-
-✅ Tous les outils conteneurisés
-✅ Environnements reproductibles (Conda)
-✅ Code versionné (Git)
-✅ Documentation complète
-👥 Équipe
-
-## Étudiants M2 AMI2B - ReproHackaton 2025
-
-[Donatien WALLAERT]
-[Tom GORTANA]
-[Marie MEIER]
-[Tom BELLIVIER]
-
-## 📚 Références
-
-Article principal : Peyrusson et al. (2020) Nature Communications
-Workflow : Snakemake best practices
-Analyse RNA-Seq : DESeq2 vignette
-Génome référence : S. aureus NCTC 8325 (CP000253.1)
-
-
-## 📄 License
-
-MIT License - Voir le fichier LICENSE pour plus de détails.
+Tom BELLIVIER
+Tom GORTANA
+Marie MEIER
+Donatien WALLAERT

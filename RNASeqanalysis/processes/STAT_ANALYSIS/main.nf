@@ -1,14 +1,15 @@
 process STAT_ANALYSIS {
-  publishDir "results/ma_plot", mode: 'copy', overwrite: true
+  publishDir "results/plots", mode: 'copy', overwrite: true
 
   input:
-    tuple path(coldata), path(count_matrix), path(script_R)
+    tuple path(coldata), path(count_matrix)
 
   output:
     path "ma_plot.png", emit: ma_plot_file
+    path "pca_plot.png", emit: pca_plot_file
 
   script:
     """
-    Rscript ${script_R} ${coldata} ${count_matrix} ma_plot.png
+    STAT_ANALYSIS.R ${coldata} ${count_matrix} ma_plot.png pca_plot.png
     """
 }

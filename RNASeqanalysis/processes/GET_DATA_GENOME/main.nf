@@ -6,7 +6,7 @@ process GET_DATA_GENOME {
 
     output:
     path 'reference.fasta', emit: ref_genome_file
-    path 'annotation.gff', emit: gff_gile
+    path 'annotation.gff', emit: gff_file
 
     script:
     """
