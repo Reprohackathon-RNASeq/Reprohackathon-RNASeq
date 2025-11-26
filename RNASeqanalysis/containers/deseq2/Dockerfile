@@ -64,5 +64,8 @@ RUN R -e "install.packages('Rgraphviz/', repos = NULL, type='source')" \
 # Install DESeq2 (version 1.16.1)
 RUN R -e "options(repos = c(CRAN='https://packagemanager.posit.co/cran/__linux__/focal/2018-01-11')); BiocInstaller::biocLite('DESeq2')"
 
+# Install EnrichmentBrowser
+RUN R -e "BiocInstaller::biocLite('EnrichmentBrowser')"
+
 # Test that DESeq2 loads correctly
 RUN Rscript -e 'library("DESeq2")'

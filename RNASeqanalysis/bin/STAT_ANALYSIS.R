@@ -1,3 +1,6 @@
+#!/usr/bin/env Rscript
+#chmod +x bin/STAT_ANALYSIS.R
+
 ###############################################################################
 # STAT ANALYSIS
 ###############################################################################
@@ -5,14 +8,17 @@
 # Load required libraries
 library(DESeq2) 
 
-# Expect 3 arguments: coldata file, count matrix file, output file
+# Expect 4 arguments: coldata file, count matrix file, output MA plot file, output PCA plot file
 args <- commandArgs(trailingOnly = TRUE)
 coldata_path <- args[1]
 count_matrix_path <- args[2]
-output_file <- args[3]
+output_ma_plot <- args[3]
+output_pca_plot <- args[4]
 
 
+###############################################################################
 # 1. LOAD AND HARMONIZE COL DATA
+###############################################################################
 
 # Load coldata: First column (SRR_ID) must become row names
 coldata <- read.table(coldata_path, header = TRUE, sep = "\t", 
@@ -23,8 +29,9 @@ coldata$Condition <- factor(coldata$Condition)
 # Set 'control' as the reference level for log2FC calculation
 coldata$Condition <- relevel(coldata$Condition, ref = "control") 
 
-
+###############################################################################
 # 2. LOAD, CLEAN, AND HARMONIZE COUNT MATRIX
+###############################################################################
 
 # Load the count matrix
 # Skip the header comments
@@ -48,8 +55,10 @@ counts_matrix <- apply(counts_matrix, 2, as.numeric)
 rownames(counts_matrix) <- rownames(counts_matrix_raw)
 colnames(counts_matrix) <- rownames(coldata)
 
-
+###############################################################################
 # 3. DESEQ2 ANALYSIS
+###############################################################################
+
 # Create the DESeqDataSet object
 dds <- DESeqDataSetFromMatrix(
   countData = round(counts_matrix), # Needs integer counts
@@ -64,8 +73,9 @@ dds <- DESeq(dds)
 # Extract results (IP vs control)
 res <- results(dds, contrast = c("Condition", "IP", "control"), alpha = 0.05)
 
-
+###############################################################################
 # 4. MA-PLOT GENERATION
+###############################################################################
 
 # Convert results to a clean data frame
 res_df_clean <- as.data.frame(res)
@@ -86,7 +96,7 @@ black_transp <- rgb(0, 0, 0, 0.5)
 point_colors_transp <- ifelse(res_df_clean$padj < padj_cutoff, red_transp, black_transp)
 
 # Open the PNG graphics device
-png(output_file, width = 850, height = 800, res = 150, type = "cairo")
+png(output_ma_plot, width = 850, height = 800, res = 150, type = "cairo")
 
 # MA-plot with custom grid and styles
 par(
@@ -181,8 +191,65 @@ points(
 
 # Add the reference line
 abline(h = 0, col = "gray50", lty = 2)
-  
-# Close the graphics device
-dev.off()
 
 ###############################################################################
+# 5. PCA-PLOT GENERATION
+###############################################################################
+
+# VST (Variance Stabilizing Transformation) 
+# 'blind = FALSE' to uses design (~ Condition) to improve transformation by taking the model into account
+vsd <- vst(dds, blind = FALSE)
+
+# PCA data extraction with plotPCA() (from deseq2)
+data_pca <- plotPCA(vsd, intgroup="Condition", returnData=TRUE)
+
+# % of variance explained
+percentVar <- round(100 * attr(data_pca, "percentVar"))
+
+# PCA plot
+png(output_pca_plot, width = 850, height = 800, res = 150, type = "cairo")
+
+par(mgp = c(0.9, 0.3, 0))
+
+plot(
+  data_pca$PC1, data_pca$PC2,
+  col = as.numeric(data_pca$Condition) + 1,
+  pch = 19,
+  main = "PCA of Samples (VST-transformed Data)",
+  xlab = paste0("PC1: ", percentVar[1], "% variance"),
+  ylab = paste0("PC2: ", percentVar[2], "% variance"),
+  xaxt = "n",   # removing axes to redraw more cleanly
+  yaxt = "n",
+  bty = "n",
+  
+  # grey grid
+  panel.first = {
+    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4],
+         col = "gray90", border = NA)
+    
+    # white lines in the grid
+    abline(h = pretty(data_pca$PC2, n = 10), col = "white", lty = 1)
+    abline(v = pretty(data_pca$PC1, n = 10), col = "white", lty = 1)
+  }
+)
+
+# Position the text to the left for the control group and to the right for the IP
+pos_vec <- ifelse(data_pca$Condition == "control", 2, 4)
+
+text(
+  data_pca$PC1,
+  data_pca$PC2,
+  labels = rownames(data_pca),
+  pos = pos_vec,
+  cex = 0.5
+)
+
+# adding the legend
+legend("bottomleft", 
+       legend = levels(data_pca$Condition), 
+       col = 1:length(levels(data_pca$Condition)) + 1, 
+       pch = 19)
+
+
+# Close the graphics device
+dev.off()

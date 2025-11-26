@@ -33,7 +33,7 @@ workflow {
     ch_fastq_files = DOWNLOAD_FASTQ(ch_sra_ids).fastq_files 
 
     // Perform quality check on the downloaded FASTQ files
-    //QUALITY_FASTQ(ch_fastq_files)
+    QUALITY_FASTQ(ch_fastq_files)
 
     // Trim the downloaded FASTQ files
     ch_trimmed_sequences = TRIM_SEQUENCE(ch_fastq_files)
@@ -41,7 +41,7 @@ workflow {
     // Get the reference genome
     ch_data_genome = GET_DATA_GENOME(params.ref_genome)
     ch_ref_genome = ch_data_genome.ref_genome_file
-    ch_annotations = ch_data_genome.gff_gile
+    ch_annotations = ch_data_genome.gff_file
 
     // Index genome with bowtie
     ch_indexed_genome = INDEX_REF_GENOME(ch_ref_genome).indexed_genome
@@ -59,11 +59,10 @@ workflow {
     }
 
     // Create colData file
-    ch_script_R_coldata = Channel.value(file("${projectDir}/scripts/CREATE_COLDATA.R"))
-    ch_coldata_file = CREATE_COLDATA(ch_geo_table.combine(ch_sra_data).combine(ch_script_R_coldata)).coldata_file
+    ch_coldata_file = CREATE_COLDATA(ch_geo_table.combine(ch_sra_data)).coldata_file
 
-    ch_script_R_analysis = Channel.value(file("${projectDir}/scripts/STAT_ANALYSIS.R"))
-    ch_ma_plot = STAT_ANALYSIS(ch_coldata_file.combine(ch_count_matrix).combine(ch_script_R_analysis)).ma_plot_file
+    // Statistical analysis
+    ch_ma_plot = STAT_ANALYSIS(ch_coldata_file.combine(ch_count_matrix)).ma_plot_file
 }
 
 

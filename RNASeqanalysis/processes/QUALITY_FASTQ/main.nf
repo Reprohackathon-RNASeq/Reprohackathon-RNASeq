@@ -1,11 +1,11 @@
 process QUALITY_FASTQ {
-  publishDir "results/quality/fastq", mode: 'copy', overwrite: true
+  publishDir "results/quality_fastq", mode: 'copy', overwrite: true
 
   input:
     path fastq_files
 
   output:
-    path "fastqc_report/*"
+    path "fastqc_report/*", emit: quality_reports
 
   script:
     """

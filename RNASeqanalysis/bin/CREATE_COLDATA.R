@@ -1,9 +1,11 @@
+#!/usr/bin/env Rscript
+
 ###############################################################################
 # GET COLDATA
 ###############################################################################
 
 # Load required libraries
-library(GEOquery)
+#library(GEOquery)
 library(dplyr)
 library(stringr)
 library(readr) 
