@@ -5,6 +5,7 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage{float}
 
 \title{Reprohackathon-RNASeq}
 \author{Donatien Wallaert, Tom Bellivier, Marie Meier, Tom Gortana}
@@ -14,47 +15,42 @@
 
 \maketitle
 
-\section{Introduction}
-
-Reproducibility represents a cornerstone of the scientific method, enabling independent researchers to validate findings and build upon previous work. In the field of bioinformatics and computational biology, reproducibility has emerged as a critical challenge, particularly when dealing with high-throughput sequencing data analysis. The reproducibility crisis in computational research stems from multiple factors including differences in software versions, computational environments, data processing pipelines, and inadequate documentation of analytical procedures. These challenges underscore the importance of implementing robust reproducibility frameworks that encompass version control, containerization technologies, workflow management systems, and comprehensive documentation.
-
-The present reprohackathon project aims to reproduce the RNA-sequencing analysis published by Peyrusson et al. in Nature Communications (2020), which investigated intracellular Staphylococcus aureus persisters upon antibiotic exposure. This study addresses a clinically significant phenomenon: bacterial persister cells, which are phenotypic variants exhibiting a transient non-growing state and antibiotic tolerance that can lead to therapeutic failures and chronic infections. Unlike antibiotic resistance, which is genetically inherited, persistence is a reversible phenotypic state characterized by growth arrest and multidrug tolerance.
-
-\subsection{Biological Context: Staphylococcus aureus Persisters and Antibiotic Tolerance}
-
-Staphylococcus aureus is a major human pathogen responsible for a wide range of infections, from superficial skin infections to life-threatening conditions such as bacteremia, endocarditis, and pneumonia. The intracellular survival of S. aureus within host cells has been recognized as a critical factor contributing to infection recurrence and treatment failure. When bacteria enter host cells, particularly macrophages, they face multiple environmental stresses including nutrient limitation, oxidative stress, and antibiotic pressure. In response to these stresses, a subpopulation of bacteria adopts a persister phenotype, characterized by metabolic dormancy and tolerance to bactericidal antibiotics.
-
-The original study by Peyrusson et al. provided compelling evidence for the existence of intracellular S. aureus persisters through single-cell level analysis using fluorescence dilution methods. The researchers demonstrated that bacteria surviving antibiotic treatment within infected macrophages exhibited biphasic killing kinetics, a hallmark of persister formation, with a bulk of susceptible bacteria rapidly eliminated while a small subpopulation persisted for extended periods. Importantly, this persister phenotype was shown to be stable but reversible upon antibiotic removal, with non-dividing bacteria resuming growth once the antibiotic pressure was alleviated.
-
-The transcriptomic analysis performed in the original study revealed that intracellular persisters were not simply dormant cells, but rather metabolically active bacteria displaying a profoundly altered gene expression profile. Through RNA-sequencing, the authors identified 1,477 differentially expressed genes between intracellular persisters and control bacteria, with activation of multiple stress response pathways including the stringent response, cell wall stress response, SOS DNA damage response, and heat shock response. These adaptive responses were associated with multidrug tolerance, as persisters induced by a single antibiotic class demonstrated cross-tolerance to antibiotics with unrelated mechanisms of action.
-
-\subsection{RNA-Sequencing and Differential Gene Expression Analysis}
-
-RNA sequencing (RNA-seq) has revolutionized transcriptomics research by enabling comprehensive, quantitative analysis of gene expression at unprecedented resolution and scale. Unlike microarray-based approaches, RNA-seq provides digital measurements of transcript abundance, allows detection of novel transcripts and splice variants, and covers a broader dynamic range of expression levels. The technology generates millions of short sequence reads from fragmented RNA molecules, which must be computationally processed through a multi-step bioinformatics pipeline.
-
-The standard RNA-seq workflow encompasses several critical stages: quality control of raw sequencing reads, adapter trimming and quality filtering, alignment to a reference genome, quantification of gene expression levels through read counting, and statistical analysis to identify differentially expressed genes. Each step requires careful selection of appropriate software tools, parameters, and quality control metrics to ensure reliable results. The differential expression analysis typically employs statistical frameworks such as DESeq2, edgeR, or limma, which model count data using negative binomial distributions to account for biological variability and technical noise.
-
-\subsection{Reproducibility Challenges in RNA-Seq Analysis}
-
-Reproducibility in RNA-seq analysis faces numerous technical and computational challenges. Different bioinformatics pipelines, even when analyzing identical raw data, can produce divergent results depending on software versions, parameter settings, and algorithmic implementations. This variability can significantly impact downstream biological interpretation and conclusions. Studies have shown that software updates, changes in reference genome annotations, and differences in statistical testing procedures can all influence the final list of differentially expressed genes.
-
-To address these reproducibility challenges, the bioinformatics community has developed several best practices and technological solutions. Version control systems like Git enable tracking of code changes and collaborative development. Container technologies such as Docker and Singularity package complete software environments, including specific versions of all dependencies, ensuring consistent execution across different computing platforms. Workflow management systems like Nextflow and Snakemake automate pipeline execution, maintain detailed logs of processing steps, and enable scalable processing of large sample cohorts.
-
-\subsection{The Reprohackathon Approach}
-
-Reprohackathons represent an educational and practical approach to promoting reproducibility in bioinformatics research. These hackathon-style events challenge participants to reproduce published analyses using modern reproducibility tools and frameworks. The pedagogical value of reprohackathons lies in confronting students with real-world challenges encountered when attempting to replicate scientific analyses, including incomplete method descriptions, unavailable data, deprecated software, and computational resource limitations.
-
-In this project, we implemented a reprohackathon focused on reproducing the RNA-seq component of the Peyrusson et al. study, specifically the identification of differentially expressed genes between intracellular S. aureus persisters exposed to oxacillin and control bacteria. The project required developing a fully reproducible workflow using containerization (Docker) for environment management, workflow orchestration (Nextflow) for pipeline automation, and version control (Git) for code tracking.
-
-This reprohackathon addresses several key learning objectives: understanding the biological context and experimental design of the original study, implementing best practices for reproducible computational research, gaining hands-on experience with containerization and workflow management technologies, managing large-scale sequencing data, and critically evaluating factors that affect reproducibility in bioinformatics. By working with a real published dataset and attempting to reproduce published findings, this project provides practical insights into the challenges and solutions for computational reproducibility in modern genomics research.
-
 \section{Sommaire}
 
 \begin{enumerate}
+  \item Introduction
   \item Material and Methods (Tools used, and setup)
   \item Results (Workflow developed, results obtained after execution)
   \item Conclusion / perspectives (Interpretation of the results, and conclusion about reproducibility)
 \end{enumerate}
+
+\section{Introduction}
+
+Reproducibility is a core principle of the scientific method, as it allows independent researchers to validate findings and extend previous work. In bioinformatics and computational biology, achieving reproducible analyses is particularly challenging due to complex software stacks, evolving reference data, and often incomplete documentation. Addressing these issues requires integrated frameworks that combine version control, containerization, workflow management, and clear reporting of analytical steps.
+
+This reprohackathon project focuses on reproducing the RNA-sequencing analysis from Peyrusson et al. (Nature Communications, 2020), which examined intracellular Staphylococcus aureus persisters during antibiotic exposure. Persister cells are phenotypic variants that transiently tolerate antibiotics without carrying genetic resistance mutations, making them important contributors to treatment failure and recurrent infections.
+
+\subsection{Biological Context: Staphylococcus aureus Persisters and Antibiotic Tolerance}
+
+Staphylococcus aureus is a major human pathogen causing infections that range from mild skin disease to severe invasive syndromes. Intracellular survival of S. aureus within host cells such as macrophages is thought to promote infection recurrence by sheltering bacteria from immune responses and antibiotic activity. Under intracellular stresses, a subpopulation can adopt a persister state characterized by growth arrest and high tolerance to bactericidal antibiotics.
+
+Peyrusson et al. used single-cell fluorescence-based approaches to show that intracellular S. aureus surviving antibiotic treatment display biphasic killing kinetics, with most bacteria rapidly dying and a minority persisting for prolonged periods. The persister phenotype was stable under antibiotic pressure but reversible once the drug was removed, as non-dividing cells resumed growth when the stress was lifted.
+
+Transcriptomic profiling in the same study revealed that intracellular persisters remained metabolically active but exhibited a markedly reprogrammed gene expression pattern. RNA-seq identified 1,477 differentially expressed genes between intracellular persisters and control bacteria, including induction of stringent response, cell wall stress, SOS DNA damage, and heat shock pathways, which together were associated with multidrug tolerance and cross-tolerance to unrelated antibiotics.
+
+\subsection{RNA-Sequencing and Differential Gene Expression Analysis}
+
+RNA sequencing (RNA-seq) enables genome-wide, quantitative measurement of transcript abundance with a broad dynamic range and the ability to detect novel transcripts compared with microarrays. Typical RNA-seq analysis pipelines include quality control, read trimming, alignment to a reference genome, quantification of reads per gene, and statistical testing for differential expression. Differential expression tools such as DESeq2 and edgeR model count data using negative binomial distributions, whereas limma applies linear models to transformed expression values.
+
+\subsection{Reproducibility Challenges in RNA-Seq Analysis}
+
+RNA-seq results can vary substantially across pipelines due to differences in software versions, reference annotations, parameter choices, and statistical methods, which may alter the set of genes reported as differentially expressed. Even when using the same raw data, small changes in tools or settings can propagate to biologically relevant discrepancies in downstream interpretation. To mitigate this, current best practices emphasize tracking code with Git, encapsulating environments using Docker or similar containers, and orchestrating workflows with systems such as Nextflow or Snakemake to ensure that analyses remain executable and auditable over time.
+
+\subsection{The Reprohackathon Approach}
+
+Reprohackathons are training-oriented hackathon events where participants attempt to reproduce published analyses using modern reproducibility technologies. These projects expose students to real-world obstacles such as missing methods, unavailable data, deprecated software, and limited computational resources, while also demonstrating how containerization and workflow systems can overcome such barriers.
+
+In this project, the reprohackathon centers on reproducing the RNA-seq component of the Peyrusson et al. study, focusing on differential gene expression between intracellular S. aureus persisters exposed to oxacillin and control bacteria. The workflow relies on Docker for environment management, Nextflow for pipeline automation, and Git for systematic tracking of code and configuration changes, with the goal of producing a fully reproducible and shareable analysis.
 
 \section{Materials and Methods}
 
@@ -63,11 +59,13 @@ The original study deposited RNA-seq data in the Gene Expression Omnibus (GEO) u
 
 The original experimental protocol involved infecting J774 macrophages with \textit{S. aureus} strain SH1000 expressing GFP from a tetracycline-inducible promoter at a multiplicity of infection of 100:1. Following phagocytosis, cells were exposed to high concentrations of oxacillin to induce a homogeneous population of persisters. Intact, viable persisters were isolated by fluorescence-activated cell sorting (FACS) by gating GFP-positive, propidium iodide-negative events, ensuring that only live, intracellular bacteria were collected for RNA extraction. Three biological replicates were generated for both persister and control conditions.
 
+Figure~\ref{fig:Workflow} summarizes the complete computational workflow implemented to reproduce the RNA-seq analysis, from data download to statistical analysis in DESeq2.
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{process_docker.png}
     \caption{Complete Workflow}
-    \label{fig: Workflow}
+    \label{fig:Workflow}
 \end{figure}
 
 \subsection{FASTQ File Download: Project-wide and Single-run Strategies}
@@ -165,10 +163,10 @@ The library used to perform this indexing is Bowtie. For reproducibility purpose
 In the following process, we will also use samtools and bowtie. So we create a single “bowtie” docker that contains both libraries with the appropriate versions and the latest ubuntu version.
 The docker image is stored on dockerhub at the following address: mariemeier/reprohackathon:bowtie. We create a new nextflow process named \texttt{INDEX\_REF\_GENOME} that takes the reference fastq file as input and returns the indexed reference genome in the results/index directory. Indexing is performed by the bowtie-build function within the docker. The next bash command is executed : 
 
-\begin{verbatim}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
     mkdir -p index_ref_genome
     bowtie-build ${ref_genome} index_ref_genome/indexed_ref_genome
-\end{verbatim}
+\end{lstlisting}
 
 The resulting file is an .ebwt file based on the Burrows-Wheeler transform (BWT) of the reference genome. It contains the transformed sequence of the genome, the metadata needed to reconstruct the positions of the patterns in the original genome, and optimized data structures for fast sequence searching.
 
@@ -179,21 +177,21 @@ The results are copied to the results/mapping folder, overwriting existing files
 The process takes as input a tuple containing \texttt{trimmed\_fastq} (path to the compressed fastq file \texttt{*\_trimmed.fq.gz} containing the trimmed reads) and \texttt{indexed\_genome} (path to the folder containing the reference genome index).
 The process generates a .bam file for each input FASTQ file. This is a binary (compressed) alignment format that contains the reads aligned to the reference genome. It is created from the .sam file from bowtie using samtools according to the following script: 
 
-\begin{verbatim}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
     gunzip -c ${trimmed_fastq} | \
     bowtie -S ./index_ref_genome/indexed_ref_genome - | \
     samtools view -@ ${task.cpus} -bS -o ${srr_id}.bam
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Feature Count}
 
 This step consists of creating a count matrix from the mapped sequence file. This involves counting the number of reads aligned with each gene between the two conditions. 
 We are working on a docker containing SubReads version 1.4.6-p3 available here: https://sourceforge.net/projects/subread/. It requires Ubuntu version 22.04 to use the featureCounts binary. The process named FEATURECOUNTS takes the .bam file of mapped reads as input and the gff file containing the genes location for the reference genome obtained from the process \texttt{GET\_DATA\_GENOME}. The output is a count matrix, where rows represent genes and columns represent samples, and a summary file is generated for each sample, detailing statistics such as the number of assigned and unassigned reads. The next script is executed : 
 
-\begin{verbatim}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
     featureCounts -t gene -g ID -s 1 
     -a ${gff_file} -o counts.txt ${mapped_reads}
-\end{verbatim}
+\end{lstlisting}
 
 \subsection{Creation of ColData file}
 
@@ -219,26 +217,24 @@ To do this, the \texttt{GET\_GEO\_TABLE} process downloads and extracts metadata
 
 Furthermore, the \texttt{GET\_SRA\_DATA} process takes an SRP value as input and returns a CSV file containing the metadata for the SRA runs associated with the project. The following script performs this task and is executed in the container “entrez-direct”: 
 
-\begin{verbatim}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
     esearch -db sra -query "${sra_project}" 
     | efetch -format runinfo > "sra_data_complete.csv"
-\end{verbatim}
+\end{lstlisting}
 
 Then the \texttt{CREATE\_COLDATA} process uses a R script to merge the GEO and SRA metadata and generate a structured colData file. It takes as input a tuple containing the paths to \texttt{geo\_id}, \texttt{sra\_data\_file}, and the R script, and returns the structured tsv coldata file for further analysis. It is executed in the deseq2 container at the following address: mariemeier/reprohackathon:deseq2. It contains R version 3.4.1, CRAN packages, Biocinstaller 3.5 to obtain the bioconductor packages, Rgraphviz version 2.54.0, and DESeq2 version 1.16.1. The script is : 
 
-\begin{verbatim}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
     Rscript ${script_R} ${geo_id} ${sra_data_file} coldata.tsv
-\end{verbatim}
-
-
+\end{lstlisting}
 
 \subsection{Statistical Analysis (DESeq2)}
 
 The last process performs statistical analysis in order to reproduce the two genome comparison graphs. Ran in the container deseq2, the nextflow process \texttt{STAT\_ANALYSIS} takes as input a tuple with the paths of coldata, \texttt{count\_matrix}, and the R script and returns the plot according to the following script: 
 
-\begin{verbatim}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
     Rscript ${script_R} ${coldata} ${count_matrix} ma_plot.png
-\end{verbatim}
+\end{lstlisting}
 
 \section{Results}
 
@@ -249,7 +245,18 @@ The read-counting step using \texttt{featureCounts} (v1.4.6-p3) produced a gene-
 The resulting \texttt{counts.txt} file is organized with one header line containing genomic coordinates and one column per sample, followed by one row per gene such as \texttt{gene-SAOUHSC\_00001}, \texttt{gene-SAOUHSC\_00002}, etc. 
 For each gene, the matrix reports its chromosome (CP000253.1), start and end positions, strand, length, and the raw integer counts in the six samples, for example very highly expressed genes such as \texttt{gene-SAOUHSC\_00009} (up to tens of thousands of reads) and more weakly expressed genes with only a few reads. This structure matches the expected gene-by-sample input format for downstream normalization and differential expression analysis with DESeq2.
 
-\subsection{Stat results}
+\subsection{Differential Expression and Reproduction of the MA-plot}
+
+Using the \texttt{STAT\_ANALYSIS.R} script, the DESeq2 analysis was executed directly from the count matrix and \texttt{coldata} file to reproduce the MA-plot of the complete RNA-seq dataset shown in Supplementary Figure~3 of Peyrusson \textit{et al.}. The script builds a \texttt{DESeqDataSet} with design \texttt{\textasciitilde{} Condition}, runs the standard DESeq2 pipeline with default parameters, and extracts the contrast \textit{IP vs.\ control}, yielding for each gene a base mean of normalized counts, a log$_2$ fold change, and an adjusted $p$-value. From these results, we computed the MA coordinates (A = log$_2$(baseMean), M=log$_2$ fold change) and generated a custom base‑R plot, exporting the figure as \texttt{ma\_plot.png} (Figure~\ref{fig:ma_plot_ours}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{ma_plot.png}
+    \caption{MA-plot of the complete RNA-seq dataset obtained with our DESeq2 analysis (IP vs.\ control). Red points indicate genes with adjusted $p$-value $< 0.05$, black points non-significant genes.}
+    \label{fig:ma_plot_ours}
+\end{figure}
+
+Our MA-plot reproduces both the global structure and the visual style of the original supplementary figure: genes are centred around a log$_2$ fold change of zero, with increased dispersion at low counts and a clear band of significant genes (red points) extending towards positive and negative fold changes at higher mean expression values. As in the publication, log$_2$ fold changes are truncated at ±4, with points beyond these thresholds shown as triangles at the top or bottom of the plot, and significance is highlighted with an adjusted $p$-value cutoff of 0.05. Qualitatively, the density and spread of significant genes across the dynamic range of normalized counts are very similar to those reported by Peyrusson \textit{et al.}, indicating that our workflow rapidly recovers a transcriptomic signature that is globally consistent with the original RNA‑seq differential expression analysis.
 
 \subsection{Repro}
 
