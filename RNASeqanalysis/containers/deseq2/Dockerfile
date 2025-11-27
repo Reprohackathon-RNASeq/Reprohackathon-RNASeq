@@ -67,5 +67,8 @@ RUN R -e "options(repos = c(CRAN='https://packagemanager.posit.co/cran/__linux__
 # Install EnrichmentBrowser
 RUN R -e "BiocInstaller::biocLite('EnrichmentBrowser')"
 
+# Install KEGGREST
+RUN R -e "BiocInstaller::biocLite('KEGGREST')"
+
 # Test that DESeq2 loads correctly
 RUN Rscript -e 'library("DESeq2")'
