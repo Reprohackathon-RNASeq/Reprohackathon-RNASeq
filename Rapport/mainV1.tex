@@ -1,0 +1,281 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref} % For clickable links
+\usepackage{url}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[a4paper, margin=2.5cm]{geometry}
+
+\title{Reprohackathon-RNASeq}
+\author{Donatien Wallaert, Tom Bellivier, Marie Meier, Tom Gortana}
+\date{November 2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Reproducibility represents a cornerstone of the scientific method, enabling independent researchers to validate findings and build upon previous work. In the field of bioinformatics and computational biology, reproducibility has emerged as a critical challenge, particularly when dealing with high-throughput sequencing data analysis. The reproducibility crisis in computational research stems from multiple factors including differences in software versions, computational environments, data processing pipelines, and inadequate documentation of analytical procedures. These challenges underscore the importance of implementing robust reproducibility frameworks that encompass version control, containerization technologies, workflow management systems, and comprehensive documentation.
+
+The present reprohackathon project aims to reproduce the RNA-sequencing analysis published by Peyrusson et al. in Nature Communications (2020), which investigated intracellular Staphylococcus aureus persisters upon antibiotic exposure. This study addresses a clinically significant phenomenon: bacterial persister cells, which are phenotypic variants exhibiting a transient non-growing state and antibiotic tolerance that can lead to therapeutic failures and chronic infections. Unlike antibiotic resistance, which is genetically inherited, persistence is a reversible phenotypic state characterized by growth arrest and multidrug tolerance.
+
+\subsection{Biological Context: Staphylococcus aureus Persisters and Antibiotic Tolerance}
+
+Staphylococcus aureus is a major human pathogen responsible for a wide range of infections, from superficial skin infections to life-threatening conditions such as bacteremia, endocarditis, and pneumonia. The intracellular survival of S. aureus within host cells has been recognized as a critical factor contributing to infection recurrence and treatment failure. When bacteria enter host cells, particularly macrophages, they face multiple environmental stresses including nutrient limitation, oxidative stress, and antibiotic pressure. In response to these stresses, a subpopulation of bacteria adopts a persister phenotype, characterized by metabolic dormancy and tolerance to bactericidal antibiotics.
+
+The original study by Peyrusson et al. provided compelling evidence for the existence of intracellular S. aureus persisters through single-cell level analysis using fluorescence dilution methods. The researchers demonstrated that bacteria surviving antibiotic treatment within infected macrophages exhibited biphasic killing kinetics, a hallmark of persister formation, with a bulk of susceptible bacteria rapidly eliminated while a small subpopulation persisted for extended periods. Importantly, this persister phenotype was shown to be stable but reversible upon antibiotic removal, with non-dividing bacteria resuming growth once the antibiotic pressure was alleviated.
+
+The transcriptomic analysis performed in the original study revealed that intracellular persisters were not simply dormant cells, but rather metabolically active bacteria displaying a profoundly altered gene expression profile. Through RNA-sequencing, the authors identified 1,477 differentially expressed genes between intracellular persisters and control bacteria, with activation of multiple stress response pathways including the stringent response, cell wall stress response, SOS DNA damage response, and heat shock response. These adaptive responses were associated with multidrug tolerance, as persisters induced by a single antibiotic class demonstrated cross-tolerance to antibiotics with unrelated mechanisms of action.
+
+\subsection{RNA-Sequencing and Differential Gene Expression Analysis}
+
+RNA sequencing (RNA-seq) has revolutionized transcriptomics research by enabling comprehensive, quantitative analysis of gene expression at unprecedented resolution and scale. Unlike microarray-based approaches, RNA-seq provides digital measurements of transcript abundance, allows detection of novel transcripts and splice variants, and covers a broader dynamic range of expression levels. The technology generates millions of short sequence reads from fragmented RNA molecules, which must be computationally processed through a multi-step bioinformatics pipeline.
+
+The standard RNA-seq workflow encompasses several critical stages: quality control of raw sequencing reads, adapter trimming and quality filtering, alignment to a reference genome, quantification of gene expression levels through read counting, and statistical analysis to identify differentially expressed genes. Each step requires careful selection of appropriate software tools, parameters, and quality control metrics to ensure reliable results. The differential expression analysis typically employs statistical frameworks such as DESeq2, edgeR, or limma, which model count data using negative binomial distributions to account for biological variability and technical noise.
+
+\subsection{Reproducibility Challenges in RNA-Seq Analysis}
+
+Reproducibility in RNA-seq analysis faces numerous technical and computational challenges. Different bioinformatics pipelines, even when analyzing identical raw data, can produce divergent results depending on software versions, parameter settings, and algorithmic implementations. This variability can significantly impact downstream biological interpretation and conclusions. Studies have shown that software updates, changes in reference genome annotations, and differences in statistical testing procedures can all influence the final list of differentially expressed genes.
+
+To address these reproducibility challenges, the bioinformatics community has developed several best practices and technological solutions. Version control systems like Git enable tracking of code changes and collaborative development. Container technologies such as Docker and Singularity package complete software environments, including specific versions of all dependencies, ensuring consistent execution across different computing platforms. Workflow management systems like Nextflow and Snakemake automate pipeline execution, maintain detailed logs of processing steps, and enable scalable processing of large sample cohorts.
+
+\subsection{The Reprohackathon Approach}
+
+Reprohackathons represent an educational and practical approach to promoting reproducibility in bioinformatics research. These hackathon-style events challenge participants to reproduce published analyses using modern reproducibility tools and frameworks. The pedagogical value of reprohackathons lies in confronting students with real-world challenges encountered when attempting to replicate scientific analyses, including incomplete method descriptions, unavailable data, deprecated software, and computational resource limitations.
+
+In this project, we implemented a reprohackathon focused on reproducing the RNA-seq component of the Peyrusson et al. study, specifically the identification of differentially expressed genes between intracellular S. aureus persisters exposed to oxacillin and control bacteria. The project required developing a fully reproducible workflow using containerization (Docker) for environment management, workflow orchestration (Nextflow) for pipeline automation, and version control (Git) for code tracking.
+
+This reprohackathon addresses several key learning objectives: understanding the biological context and experimental design of the original study, implementing best practices for reproducible computational research, gaining hands-on experience with containerization and workflow management technologies, managing large-scale sequencing data, and critically evaluating factors that affect reproducibility in bioinformatics. By working with a real published dataset and attempting to reproduce published findings, this project provides practical insights into the challenges and solutions for computational reproducibility in modern genomics research.
+
+\section{Sommaire}
+
+\begin{enumerate}
+  \item Material and Methods (Tools used, and setup)
+  \item Results (Workflow developed, results obtained after execution)
+  \item Conclusion / perspectives (Interpretation of the results, and conclusion about reproducibility)
+\end{enumerate}
+
+\section{Materials and Methods}
+
+\subsection{Study Design and Data Sources}
+The original study deposited RNA-seq data in the Gene Expression Omnibus (GEO) under accession number GSE139659 (\url{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE139659}). The experimental design compared intracellular persisters---bacteria recovered from J774 macrophages exposed to 50$\times$ MIC oxacillin for 24 hours---against control samples consisting of bacteria mixed with cell lysate from non-infected macrophages.
+
+The original experimental protocol involved infecting J774 macrophages with \textit{S. aureus} strain SH1000 expressing GFP from a tetracycline-inducible promoter at a multiplicity of infection of 100:1. Following phagocytosis, cells were exposed to high concentrations of oxacillin to induce a homogeneous population of persisters. Intact, viable persisters were isolated by fluorescence-activated cell sorting (FACS) by gating GFP-positive, propidium iodide-negative events, ensuring that only live, intracellular bacteria were collected for RNA extraction. Three biological replicates were generated for both persister and control conditions.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{process_docker.png}
+    \caption{Complete Workflow}
+    \label{fig: Workflow}
+\end{figure}
+
+\subsection{FASTQ File Download: Project-wide and Single-run Strategies}
+The initial step of our RNA-seq workflow involved the automated retrieval of raw sequencing data in FASTQ format for each SRA run accession associated with the study. To ensure computational reproducibility and ease of deployment across different environments, the download process was encapsulated both as a dedicated Nextflow process and within a custom Docker container built for the SRA Toolkit.
+
+\subsubsection{Unified Download Logic}
+All downloads are performed via the \texttt{DOWNLOAD\_FASTQ} Nextflow process, which encapsulates the SRA Toolkit in a dedicated Docker container. This guarantees that every file, regardless of how it is selected, is downloaded in the same controlled, reproducible environment. The process not only downloads each FASTQ file, but also automatically compresses it (\texttt{.gz}) for efficient storage and downstream processing. Additionally, in ``test mode," it can produce a truncated file containing only the first 10{,}000 reads for workflow validation.
+
+\textbf{Key script logic:}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
+echo "Downloading FASTQ for ${sra_id}"
+prefetch ${sra_id}
+if [ "${params.test}" == "true" ]; then
+    # Test mode: keep first 10,000 reads
+    fasterq-dump --threads ${task.cpus} -t . --progress ${sra_id}
+    gzip ${sra_id}.fastq
+    zcat ${sra_id}.fastq.gz | head -n 10000 | gzip > ${sra_id}_test.fastq.gz
+    mv ${sra_id}_test.fastq.gz ${sra_id}.fastq.gz
+else
+    fasterq-dump --threads ${task.cpus} -t . --progress ${sra_id}
+    gzip ${sra_id}.fastq
+fi
+echo "DOWNLOADING completed: ${sra_id}"
+\end{lstlisting}
+
+This code downloads, compresses, and (if in test mode) truncates each FASTQ file.
+
+\subsubsection{Two Modes of SRR Retrieval}
+
+\paragraph{Download All Samples via SRA Project Accession:}
+When the SRA project accession (e.g., SRP227811) is given:
+The \texttt{GET\_SRR} process uses a Docker image with Entrez Direct installed to query the NCBI SRA database and retrieve all associated SRR numbers.
+
+Example script:
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
+esearch -db sra -query ${sra_project} | efetch -format runinfo | cut -d',' -f1 | grep SRR > SRR_list.txt
+\end{lstlisting}
+
+This extracts every SRR accession for the given project. The resulting list (e.g., six files: 3 persister, 3 control) is passed to the \texttt{DOWNLOAD\_FASTQ} process.
+Each SRR is then downloaded using the same SRA Toolkit Docker, ensuring environment and method consistency.
+
+Note: Entrez Direct Docker provides only the utilities (\texttt{esearch}, \texttt{efetch}, etc.) to extract all run accessions for a given project. It is not used for downloading FASTQ files themselves.
+
+\paragraph{Download an Individual File via SRR:}
+When a specific SRR number is provided (e.g., SRR10379726), the workflow directly invokes the \texttt{DOWNLOAD\_FASTQ} process for that accession, using the SRA Toolkit Docker container.
+
+\subsubsection{Workflow Integration and Reproducibility}
+By separating SRR list generation (project context) from data download, and by using \texttt{DOWNLOAD\_FASTQ} exclusively for all file retrieval, the workflow achieves:
+\begin{itemize}
+    \item \textbf{Complete reproducibility} of the download operation through a single well-defined environment (SRA Toolkit Docker).
+    \item \textbf{Flexibility} for users: download a whole project dataset (using SRA project accession + \texttt{GET\_SRR}) or a single file (using one SRR).
+    \item \textbf{Robustness and transparency}: only a single, well-audited process (\texttt{DOWNLOAD\_FASTQ}) performs the key task of file downloading, with full provenance and containerization benefits for traceability, auditing, and scientific rigor.
+\end{itemize}
+
+\subsection{Read Trimming: Trim Galore and Cutadapt}
+During this step, raw sequencing reads are processed to remove low-quality bases and adapter contamination before mapping. To mirror the pipeline from the original publication, we used Trim Galore version 0.4.4 and Cutadapt version 1.11, both packaged in a custom Docker image based on Ubuntu 18.04 and Python 3.6. This ensures our trimming environment is identical to that in the study, supporting strict reproducibility.
+
+Each input FASTQ file is trimmed using a quality threshold of Q=20 (which keeps bases with $\geq99$\% base call accuracy) and sequences are retained only if they are at least 25 bases in length. The step also compresses the output for efficient storage and downstream use. The container setup verifies the installed version of Trim Galore to prevent discrepancies.
+
+Trimming is automated in the workflow by the following Nextflow process:
+
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
+# Remove .gz extension and .fastq extension to get SRA ID
+SRA_ID=$(basename ${fastq_files} .fastq.gz)
+
+trim_galore -q 20 --phred33 --length 25 ${SRA_ID}.fastq.gz
+
+# Rename output file
+# mv ${SRA_ID}.fastq.gz_trimmed.fq.gz ${SRA_ID}_trimmed.fq.gz
+\end{lstlisting}
+
+This script extracts the SRA ID from each filename and processes it with the specified parameters, ensuring that downstream alignment and quantification are performed on high-quality, adapter-free reads. By replicating both the software versions and the precise logic of the original workflow, we maintain analytical fidelity and reliability throughout this step.
+
+\subsection{Reference Genome and Annotation Download}
+To replicate the RNA-seq analysis pipeline exactly, the reference genome and its genome annotation for \textit{Staphylococcus aureus} were retrieved from NCBI using the accession number CP000253.1. This step was automated in the reproducible workflow using a dedicated Nextflow process, \texttt{GET\_DATA\_GENOME}, which interfaces with the NCBI Entrez system for nucleotide data retrieval.
+
+The process downloads two essential files: the reference genome sequence in FASTA format (\texttt{reference.fasta}), and the genome annotation in GFF3 format (\texttt{annotation.gff}). Both files serve as critical inputs for mapping and feature quantification steps downstream.
+
+This process uses the \texttt{esearch} and \texttt{efetch} utilities provided by the Entrez Direct Docker container to ensure consistency and reproducibility. The container guarantees that the exact same versions of Entrez tools are used, avoiding variability in database queries.
+
+\textbf{Process script excerpt:}
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
+esearch -db nucleotide -query $ref_genome | efetch -format fasta > reference.fasta
+esearch -db nuccore -query $ref_genome | efetch -format gff3 > annotation.gff
+\end{lstlisting}
+
+Here, \texttt{\$ref\_genome} corresponds to the NCBI accession CP000253.1. This two-step command first queries the nucleotide database to download the genome FASTA sequence and then queries the nucleotide core database for the corresponding annotation in GFF3 format.
+
+Providing an automated, containerized environment for this step avoids manual downloads, ensures file versions match those used in the original analysis, and supports full reproducibility within the workflow.
+
+\subsection{Index creation using Bowtie}
+
+The next step is to index the reference genome. Without an index, the algorithm would have to linearly scan the entire genome for each read, which would be extremely slow. The index allows the data to be structured for efficient searching.
+The library used to perform this indexing is Bowtie. For reproducibility purposes, we work on a docker containing Bowtie version 0.12.7, available at https://sourceforge.net/projects/bowtie-bio/postdownload.
+In the following process, we will also use samtools and bowtie. So we create a single “bowtie” docker that contains both libraries with the appropriate versions and the latest ubuntu version.
+The docker image is stored on dockerhub at the following address: mariemeier/reprohackathon:bowtie. We create a new nextflow process named \texttt{INDEX\_REF\_GENOME} that takes the reference fastq file as input and returns the indexed reference genome in the results/index directory. Indexing is performed by the bowtie-build function within the docker. The next bash command is executed : 
+
+\begin{verbatim}
+    mkdir -p index_ref_genome
+    bowtie-build ${ref_genome} index_ref_genome/indexed_ref_genome
+\end{verbatim}
+
+The resulting file is an .ebwt file based on the Burrows-Wheeler transform (BWT) of the reference genome. It contains the transformed sequence of the genome, the metadata needed to reconstruct the positions of the patterns in the original genome, and optimized data structures for fast sequence searching.
+
+\subsection{Mapping using Bowtie}
+
+The next process involves mapping the genome being studied to the indexed reference genome. Mapping is aligning short sequences (reads) obtained from sequencing with a reference sequence, which allows us to determine where they are located. The process is executed in the same “bowtie” docker as before. The new nextflow \texttt{MAPPING\_BOWTIE} process generates a .bam file containing the alignments. The process uses 3 CPU cores for execution.
+The results are copied to the results/mapping folder, overwriting existing files. 
+The process takes as input a tuple containing \texttt{trimmed\_fastq} (path to the compressed fastq file \texttt{*\_trimmed.fq.gz} containing the trimmed reads) and \texttt{indexed\_genome} (path to the folder containing the reference genome index).
+The process generates a .bam file for each input FASTQ file. This is a binary (compressed) alignment format that contains the reads aligned to the reference genome. It is created from the .sam file from bowtie using samtools according to the following script: 
+
+\begin{verbatim}
+    gunzip -c ${trimmed_fastq} | \
+    bowtie -S ./index_ref_genome/indexed_ref_genome - | \
+    samtools view -@ ${task.cpus} -bS -o ${srr_id}.bam
+\end{verbatim}
+
+\subsection{Feature Count}
+
+This step consists of creating a count matrix from the mapped sequence file. This involves counting the number of reads aligned with each gene between the two conditions. 
+We are working on a docker containing SubReads version 1.4.6-p3 available here: https://sourceforge.net/projects/subread/. It requires Ubuntu version 22.04 to use the featureCounts binary. The process named FEATURECOUNTS takes the .bam file of mapped reads as input and the gff file containing the genes location for the reference genome obtained from the process \texttt{GET\_DATA\_GENOME}. The output is a count matrix, where rows represent genes and columns represent samples, and a summary file is generated for each sample, detailing statistics such as the number of assigned and unassigned reads. The next script is executed : 
+
+\begin{verbatim}
+    featureCounts -t gene -g ID -s 1 
+    -a ${gff_file} -o counts.txt ${mapped_reads}
+\end{verbatim}
+
+\subsection{Creation of ColData file}
+
+In order to know which SRR corresponds to which condition, we create a tsv file containing two columns, the first being \texttt{ID\_SRR} and the second being the condition (IP or control).
+To do this, the \texttt{GET\_GEO\_TABLE} process downloads and extracts metadata from the NCBI's GEO (Gene Expression Omnibus) database. It generates a table file (TSV) that associates sample identifiers (GSM) with their respective experimental conditions (e.g., “IP” or ‘control’). It takes \texttt{geo\_id} as input and returns the corresponding tsv file. The following script is executed in the “entrez-direct” docker:
+
+\begin{verbatim}
+      geo_parent=\$(echo ${geo_id} | sed -E 's/(GSE[0-9]{3})[0-9]
+      +/\\1nnn/')
+      wget -q ftp://ftp.ncbi.nlm.nih.gov/geo/series/\${geo_parent}
+      /${geo_id}/soft/${geo_id}_family.soft.gz -O ${geo_id}.soft.gz
+      gunzip -f ${geo_id}.soft.gz
+      awk '
+      /^\\^SAMPLE/ {gsm=\$3}
+      /^!Sample_description/ {
+          desc=\$3
+          if (desc ~ /^IP/) cond="IP"
+          else if (desc ~ /^ctrl/) cond="control"
+          else cond="unknown"
+          print gsm"\\t"cond
+      }' ${geo_id}.soft > ${geo_id}_table.tsv
+\end{verbatim}
+
+Furthermore, the \texttt{GET\_SRA\_DATA} process takes an SRP value as input and returns a CSV file containing the metadata for the SRA runs associated with the project. The following script performs this task and is executed in the container “entrez-direct”: 
+
+\begin{verbatim}
+    esearch -db sra -query "${sra_project}" 
+    | efetch -format runinfo > "sra_data_complete.csv"
+\end{verbatim}
+
+Then the \texttt{CREATE\_COLDATA} process uses a R script to merge the GEO and SRA metadata and generate a structured colData file. It takes as input a tuple containing the paths to \texttt{geo\_id}, \texttt{sra\_data\_file}, and the R script, and returns the structured tsv coldata file for further analysis. It is executed in the deseq2 container at the following address: mariemeier/reprohackathon:deseq2. It contains R version 3.4.1, CRAN packages, Biocinstaller 3.5 to obtain the bioconductor packages, Rgraphviz version 2.54.0, and DESeq2 version 1.16.1. The script is : 
+
+\begin{verbatim}
+    Rscript ${script_R} ${geo_id} ${sra_data_file} coldata.tsv
+\end{verbatim}
+
+
+
+\subsection{Statistical Analysis (DESeq2)}
+
+The last process performs statistical analysis in order to reproduce the two genome comparison graphs. Ran in the container deseq2, the nextflow process \texttt{STAT\_ANALYSIS} takes as input a tuple with the paths of coldata, \texttt{count\_matrix}, and the R script and returns the plot according to the following script: 
+
+\begin{verbatim}
+    Rscript ${script_R} ${coldata} ${count_matrix} ma_plot.png
+\end{verbatim}
+
+\section{Results}
+
+\subsection{Count Matrix}
+
+The read-counting step using \texttt{featureCounts} (v1.4.6-p3) produced a gene-level count matrix for the six RNA-seq samples, corresponding to the three persister and three control conditions. The command was run in strand-specific mode (\texttt{-s 1}) on features annotated as genes in \texttt{annotation.gff} (\texttt{-t gene}, \texttt{-g ID}), and took as input the six BAM files generated by the Bowtie mapping step (\texttt{SRR10379725.bam}, \texttt{SRR10379724.bam}, \texttt{SRR10379723.bam}, \texttt{SRR10379722.bam}, \texttt{SRR10379721.bam}, \texttt{SRR10379726.bam}).
+
+The resulting \texttt{counts.txt} file is organized with one header line containing genomic coordinates and one column per sample, followed by one row per gene such as \texttt{gene-SAOUHSC\_00001}, \texttt{gene-SAOUHSC\_00002}, etc. 
+For each gene, the matrix reports its chromosome (CP000253.1), start and end positions, strand, length, and the raw integer counts in the six samples, for example very highly expressed genes such as \texttt{gene-SAOUHSC\_00009} (up to tens of thousands of reads) and more weakly expressed genes with only a few reads. This structure matches the expected gene-by-sample input format for downstream normalization and differential expression analysis with DESeq2.
+
+\subsection{Stat results}
+
+\subsection{Repro}
+
+\section{Conclusion/Perspectives}
+
+This reprohackathon project presented a great opportunity to confront both the practical and theoretical challenges of reproducing published RNA-seq analyses in a fully transparent and reproducible manner. Among the key lessons learned was the care that needed to be taken in selecting, installing, and documenting the correct versions of all libraries and tools. The creation of Docker containerized environments for each main component of the analyses, such as the SRA Toolkit, Bowtie, and Samtools, ensured computational reproducibility and avoided a series of common problems related to software incompatibilities and version changes.
+
+The time consumed by researching and checking compatible library versions was not superfluous---this was quite important at each step of the workflow execution and for supporting collaboration within the team. Indexing the reference genome and mapping sequence reads to it, using Nextflow workflows and Dockerized Bowtie, showed how crucial accurate sequence alignment is for later gene expression analyses. Thanks to careful workflow management and strict control of the computational environment, the mapping steps produced reliable alignment results, forming a solid basis for differential expression analysis. This reproducible workflow made it possible to correctly identify and extract sequences of interest---specifically, the differentially expressed genes typical of intracellular \textit{S. aureus} persisters exposed to antibiotics.
+
+Looking forward, this project highlights the increasing importance of automation and reproducibility frameworks in computational biology. Future work should aim to further improve workflow modularity and scalability, extend the pipeline to support more experimental situations, and integrate new analytical tools as they become available. Finally, keeping a strong focus on transparency, documentation, and version control will remain essential to ensure that bioinformatics analyses stay robust, shareable, and accessible to the wider scientific community.
+
+\section{References}
+\begin{enumerate}
+    \item Peyrusson, F., Varet, H., Nguyen, T. K., Legendre, R., Sismeiro, O., Coppe, J. Y., Leduc, D. (2020). Intracellular \textit{Staphylococcus aureus} persisters upon antibiotic exposure. \textit{Nature Communications}, 11, 2200. \url{https://doi.org/10.1038/s41467-020-15966-7}
+    \item Langmead, B., Trapnell, C., Pop, M., Salzberg, S. L. (2009). Ultrafast and memory-efficient alignment of short DNA sequences to the human genome. \textit{Genome Biology}, 10(3), R25. \url{https://doi.org/10.1186/gb-2009-10-3-r25}
+    \item Love, M. I., Huber, W., Anders, S. (2014). Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. \textit{Genome Biology}, 15(12), 550. \url{https://doi.org/10.1186/s13059-014-0550-8}
+    \item Li, H., Handsaker, B., Wysoker, A., Fennell, T., Ruan, J., Homer, N., ... Durbin, R. (2009). The Sequence Alignment/Map format and SAMtools. \textit{Bioinformatics}, 25(16), 2078–2079. \url{https://doi.org/10.1093/bioinformatics/btp352}
+    \item Di Tommaso, P., Chatzou, M., Floden, E. W., Barja, P. P., Palumbo, E., Notredame, C. (2017). Nextflow enables reproducible computational workflows. \textit{Nature Biotechnology}, 35(4), 316–319. \url{https://doi.org/10.1038/nbt.3820}
+    \item Merkel, D. (2014). Docker: Lightweight Linux containers for consistent development and deployment. \textit{Linux Journal}, 2014(239), 2.
+    \item Ewels, P., Magnusson, M., Lundin, S., Käller, M. (2016). MultiQC: Summarize analysis results for multiple tools and samples in a single report. \textit{Bioinformatics}, 32(19), 3047–3048. \url{https://doi.org/10.1093/bioinformatics/btw354}
+    \item Bolger, A. M., Lohse, M., Usadel, B. (2014). Trimmomatic: A flexible trimmer for Illumina sequence data. \textit{Bioinformatics}, 30(15), 2114–2120. \url{https://doi.org/10.1093/bioinformatics/btu170}
+    \item Liao, Y., Smyth, G. K., Shi, W. (2014). featureCounts: An efficient general purpose program for assigning sequence reads to genomic features. \textit{Bioinformatics}, 30(7), 923–930. \url{https://doi.org/10.1093/bioinformatics/btt656}
+    \item Kodama, Y., Shumway, M., Leinonen, R. (2012). The Sequence Read Archive: Rapid sharing of data and metadata related to sequence submissions. \textit{Nucleic Acids Research}, 40(D1), D54–D56. \url{https://doi.org/10.1093/nar/gkr854}
+    \item Git - Version Control System. Available at \url{https://git-scm.com} Accessed November 2025.
+    \item Docker Documentation. Available at \url{https://docs.docker.com} Accessed November 2025.
+\end{enumerate}
+
+
+\end{document}
