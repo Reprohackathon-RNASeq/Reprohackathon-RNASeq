@@ -12,6 +12,7 @@ include { GET_GEO_TABLE } from "./processes/GET_GEO_TABLE/"
 include { GET_SRA_DATA } from "./processes/GET_SRA_DATA/"
 include { CREATE_COLDATA } from "./processes/CREATE_COLDATA/"
 include { STAT_ANALYSIS } from "./processes/STAT_ANALYSIS/"
+include { RESULTS_COMPARISON } from "./processes/RESULTS_COMPARISON/"
 
 workflow {
 
@@ -62,7 +63,12 @@ workflow {
     ch_coldata_file = CREATE_COLDATA(ch_geo_table.combine(ch_sra_data)).coldata_file
 
     // Statistical analysis
-    ch_ma_plot = STAT_ANALYSIS(ch_coldata_file.combine(ch_count_matrix)).ma_plot_file
+    ch_gene_names = file(params.gene_names_path)
+    ch_matrix_stat = STAT_ANALYSIS(ch_coldata_file.combine(ch_count_matrix), ch_gene_names).matrix_stat_file
+
+    // Results comparison
+    ch_results_article = file(params.results_article_path)
+    RESULTS_COMPARISON(ch_matrix_stat, ch_results_article)
 }
 
 

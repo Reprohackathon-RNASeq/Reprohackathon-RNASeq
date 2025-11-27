@@ -7,14 +7,16 @@
 
 # Load required libraries
 library(DESeq2) 
+library(KEGGREST)
 
-# Expect 4 arguments: coldata file, count matrix file, output MA plot file, output PCA plot file
+# Expect 6 arguments: coldata file, count matrix file, gene map file, output matrix stat file, output MA plot file, output PCA plot file
 args <- commandArgs(trailingOnly = TRUE)
 coldata_path <- args[1]
 count_matrix_path <- args[2]
-output_ma_plot <- args[3]
-output_pca_plot <- args[4]
-
+gene_map_path <- args[3]
+output_matrix_stat <- args[4]
+output_ma_plot <- args[5]
+output_pca_plot <- args[6]
 
 ###############################################################################
 # 1. LOAD AND HARMONIZE COL DATA
@@ -73,8 +75,9 @@ dds <- DESeq(dds)
 # Extract results (IP vs control)
 res <- results(dds, contrast = c("Condition", "IP", "control"), alpha = 0.05)
 
+
 ###############################################################################
-# 4. MA-PLOT GENERATION
+# 4. GENE MAPPING AND STATISTICS MATRIX EXPORT
 ###############################################################################
 
 # Convert results to a clean data frame
@@ -83,6 +86,37 @@ res_df_clean <- as.data.frame(res)
 # Filter out rows where Log2FC or padj are NA
 res_df_clean <- res_df_clean[complete.cases(res_df_clean[, c("log2FoldChange", "padj", "baseMean")]), ]
 
+# Load gene mapping file
+gene_map <- read.table(gene_map_path, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+# Clean gene_map: remove rows with NA or empty locus.tag
+gene_map <- gene_map[!is.na(gene_map$locus.tag) & gene_map$locus.tag != "", ]
+# Keep only genes present in the results data frame
+gene_map <- gene_map[gene_map$locus.tag %in% res_df_clean$Locus_Tag, ]
+# Remove potential duplicates in gene_map
+gene_map <- gene_map[!duplicated(gene_map$locus.tag), ]
+
+res_df_clean$Locus_Tag <- rownames(res_df_clean)
+res_df_clean$Locus_Tag <- gsub("^gene-", "", res_df_clean$Locus_Tag)
+
+res_df_clean <- merge(res_df_clean, 
+                       gene_map, 
+                       by.x = "Locus_Tag", 
+                       by.y = "locus.tag",
+                       all.x = TRUE)  # = inner join  
+
+# Save the statistics matrix to a TSV file
+write.table(
+    x = res_df_clean, 
+    file = output_matrix_stat,
+    quote = FALSE, 
+    sep = "\t", 
+    row.names = FALSE,
+    col.names = TRUE
+)
+
+###############################################################################
+# 5. MA-PLOT GENERATION
+###############################################################################
 # Prepare data for the plot (Define M and A)
 M <- res_df_clean$log2FoldChange
 A <- log2(res_df_clean$baseMean) # Convert average expression to log2 (MA-plot format)
@@ -193,7 +227,7 @@ points(
 abline(h = 0, col = "gray50", lty = 2)
 
 ###############################################################################
-# 5. PCA-PLOT GENERATION
+# 6. PCA-PLOT GENERATION
 ###############################################################################
 
 # VST (Variance Stabilizing Transformation) 
