@@ -85,24 +85,12 @@ res_df_clean <- as.data.frame(res)
 
 # Filter out rows where Log2FC or padj are NA
 res_df_clean <- res_df_clean[complete.cases(res_df_clean[, c("log2FoldChange", "padj", "baseMean")]), ]
-
-# Load gene mapping file
-gene_map <- read.table(gene_map_path, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-# Clean gene_map: remove rows with NA or empty locus.tag
-gene_map <- gene_map[!is.na(gene_map$locus.tag) & gene_map$locus.tag != "", ]
-# Keep only genes present in the results data frame
-gene_map <- gene_map[gene_map$locus.tag %in% res_df_clean$Locus_Tag, ]
-# Remove potential duplicates in gene_map
-gene_map <- gene_map[!duplicated(gene_map$locus.tag), ]
-
+# Add Locus_Tag column from row names
 res_df_clean$Locus_Tag <- rownames(res_df_clean)
+# Remove "gene-" prefix from Locus_Tag
 res_df_clean$Locus_Tag <- gsub("^gene-", "", res_df_clean$Locus_Tag)
-
-res_df_clean <- merge(res_df_clean, 
-                       gene_map, 
-                       by.x = "Locus_Tag", 
-                       by.y = "locus.tag",
-                       all.x = TRUE)  # = inner join  
+# Reorder columns to have Locus_Tag first
+res_df_clean <- res_df_clean[, c("Locus_Tag", setdiff(names(res_df_clean), "Locus_Tag"))]
 
 # Save the statistics matrix to a TSV file
 write.table(
@@ -284,6 +272,9 @@ legend("bottomleft",
        col = 1:length(levels(data_pca$Condition)) + 1, 
        pch = 19)
 
+###############################################################################
+# 7. TRANSLATION PCA-PLOT GENERATION
+###############################################################################
 
 # Close the graphics device
 dev.off()
