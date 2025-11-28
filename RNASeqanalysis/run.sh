@@ -9,7 +9,7 @@
 sudo apt-get update
 sudo apt install python3.10-venv
 sudo apt install openjdk-17-jre -y
-echo 'export PATH="/opt/homebrew/opt/
+echo export PATH="/opt/homebrew/opt/"
 source ~/.zshrc   
 java -version
 curl -s https://get.nextflow.io | bash
@@ -20,5 +20,3 @@ nextflow -version
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
-nextflow run main.nf --sra_run SRP227811 --ref_genome CP000253.1 --test true
