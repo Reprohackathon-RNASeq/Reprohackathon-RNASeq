@@ -9,7 +9,7 @@
 library(DESeq2) 
 library(KEGGREST)
 
-# Expect 6 arguments: coldata file, count matrix file, gene map file, output matrix stat file, output MA plot file, output PCA plot file
+# Expect 7 arguments: coldata file, count matrix file, gene map file, output matrix stat file, output MA plot file, output PCA plot file, output translation plot file
 args <- commandArgs(trailingOnly = TRUE)
 coldata_path <- args[1]
 count_matrix_path <- args[2]
@@ -17,6 +17,7 @@ gene_map_path <- args[3]
 output_matrix_stat <- args[4]
 output_ma_plot <- args[5]
 output_pca_plot <- args[6]
+output_translation_plot <- args[7]
 
 ###############################################################################
 # 1. LOAD AND HARMONIZE COL DATA
@@ -77,7 +78,7 @@ res <- results(dds, contrast = c("Condition", "IP", "control"), alpha = 0.05)
 
 
 ###############################################################################
-# 4. GENE MAPPING AND STATISTICS MATRIX EXPORT
+# 4. STATISTICS MATRIX EXPORT
 ###############################################################################
 
 # Convert results to a clean data frame
@@ -273,8 +274,196 @@ legend("bottomleft",
        pch = 19)
 
 ###############################################################################
-# 7. TRANSLATION PCA-PLOT GENERATION
+# 7. KEGG GENE EXTRACTION
 ###############################################################################
 
+# Traduction (sao03010 - Ribosome, facteurs)
+translation_kegg_links <- KEGGREST::keggLink("sao", "sao03010")
+translation2_kegg_links <- KEGGREST::keggLink("sao", "br:sao03012")
+
+
+# Métabolisme des Acides Aminés (sao00970)
+aa_metab_kegg_links <- KEGGREST::keggLink("sao", "sao00970")
+
+# Traduction
+translation_tags <- toupper(gsub("sao:", "", translation_kegg_links))
+translation2_tags <- toupper(gsub("sao:", "", translation2_kegg_links))
+# Métabolisme des AA
+aa_metab_tags <- toupper(gsub("sao:", "", aa_metab_kegg_links))
+
+# Combine les gènes
+genes_of_interest <- unique(c(translation_tags, aa_metab_tags, translation2_tags))
+
+# Garder uniquement les gènes de traduction
+res_translation <- res_df_clean[res_df_clean$Locus_Tag %in% genes_of_interest, ]
+
+cat("Nombre de gènes dans translation2_tags :", length(translation2_tags), "\n")
+cat("Nombre de gènes dans genes_of_interest :", length(genes_of_interest), "\n")
+cat("Nombre de gènes dans res_translation :", nrow(res_translation), "\n")
+
+###############################################################################
+# 8. GENES TO PLOT
+###############################################################################
+gene_map <- read.csv(gene_map_path, sep = ";", stringsAsFactors = FALSE, check.names = FALSE)
+cat(colnames(gene_map))
+
+# Fusionner res_translation et gene_map par Locus_Tag
+res_translation <- merge(
+  res_translation, 
+  gene_map, 
+  by.x = "Locus_Tag",
+  by.y = "Locus_Tag",
+  all.x = TRUE  # garde tous les gènes de res_translation
+)
+
+# res_labeled$gene_name contient les noms pour les gènes présents dans gene_map
+# Les autres sont NA
+
+# Vérifier les gènes qui auront un label
+cat("Gènes qui seront labellisés :\n")
+cat(res_translation$gene_name[!is.na(res_translation$gene_name)], sep = "\n")
+
+#gene_map <- read.table(gene_map_path, header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+# Subset to genes of interest for labelling
+#genes_interest_subset <- c("frr", "infA", "tsf", "infB", "infC", "pth")
+#gene_map_filtered <- gene_map[gene_map$'pan gene symbol' %in% genes_interest_subset, ]
+
+# Create labels vector
+# locus_to_label <- res_translation$Locus_Tag %in% gene_map_filtered$'locus tag'
+# labels_to_plot <- rep(NA, nrow(res_translation))
+# labels_to_plot[locus_to_label] <- gene_map_filtered$`pan gene symbol`[match(
+#   res_translation$Locus_Tag[locus_to_label], 
+#   gene_map_filtered$'locus tag'
+# )]
+
+###############################################################################
+# 9. TRANSLATION GENES MA-PLOT
+###############################################################################
+
+
+# Données MA
+M_t <- res_translation$log2FoldChange
+A_t <- log2(res_translation$baseMean)
+
+# Couleurs (gènes significatifs/non significatifs)
+point_colors_t <- ifelse(res_translation$padj < padj_cutoff, red_transp, black_transp)
+
+# Ouvrir PNG
+png(output_translation_plot, width = 700, height = 700, res = 150, type = "cairo")
+
+par(
+  mar = c(5,5,2,2) + 0.1,    # marges
+  font.lab = 2,               # axes en gras
+  font.axis = 2,              # labels axes en gras
+  cex.axis = 0.9,             # taille des labels axes
+  cex.lab = 1,                # taille titres axes
+  col.axis = "black",
+  col.lab = "black",
+  mgp = c(1.5, 0.5, 0),      # distance titres axes
+  lwd = 2                     # épaisseur du cadre et axes
+)
+
+# Plot vide
+plot(
+  x = A_t,
+  y = M_t,
+  type = "n",
+  xlim = c(0, 20),
+  ylim = c(-6, 5),
+  xlab = expression(log[2]~"base Mean"),
+  ylab = expression(log[2]~"fold change"),
+  xaxt = "n",
+  yaxt = "n",
+  bty = "o"  # cadre noir
+)
+
+# Ligne pointillée horizontale
+abline(h = 0, col = "black", lty = 2)
+
+
+# Axes personnalisés, plus épais et rapprochés
+axis(side = 1, at = seq(0, 20, by = 2), lwd = 2, lwd.ticks = 2, tcl = -0.3)
+axis(side = 2, at = seq(-6, 5, by = 1), lwd = 2, lwd.ticks = 2, tcl = -0.3, las = 1)
+
+# Points
+points(
+  x = A_t[M_t < 4 & M_t > -4],
+  y = M_t[M_t < 4 & M_t > -4],
+  col = point_colors_t[M_t < 4 & M_t > -4],
+  pch = 20,
+  cex = 0.6
+)
+
+gene_positions <- list(
+  pth   = list(x0 = log2(res_translation$baseMean[res_translation$gene_name=="pth"]),
+               y0 = res_translation$log2FoldChange[res_translation$gene_name=="pth"],
+               x1 = log2(res_translation$baseMean[res_translation$gene_name=="pth"]) - 1.5,
+               y1 = res_translation$log2FoldChange[res_translation$gene_name=="pth"],
+               text_x = log2(res_translation$baseMean[res_translation$gene_name=="pth"]) - 2,
+               text_y = res_translation$log2FoldChange[res_translation$gene_name=="pth"]),
+
+  frr   = list(x0 = log2(res_translation$baseMean[res_translation$gene_name=="frr"]),
+               y0 = res_translation$log2FoldChange[res_translation$gene_name=="frr"],
+               x1 = log2(res_translation$baseMean[res_translation$gene_name=="frr"]),
+               y1 = res_translation$log2FoldChange[res_translation$gene_name=="frr"] + 1.5,
+               text_x = log2(res_translation$baseMean[res_translation$gene_name=="frr"]) - 0.5,
+               text_y = res_translation$log2FoldChange[res_translation$gene_name=="frr"] + 1.8),
+
+  infA  = list(x0 = log2(res_translation$baseMean[res_translation$gene_name=="infA"]),
+               y0 = res_translation$log2FoldChange[res_translation$gene_name=="infA"],
+               x1 = log2(res_translation$baseMean[res_translation$gene_name=="infA"]),
+               y1 = res_translation$log2FoldChange[res_translation$gene_name=="infA"] + 1.5,
+               text_x = log2(res_translation$baseMean[res_translation$gene_name=="infA"]) - 0.5,
+               text_y = res_translation$log2FoldChange[res_translation$gene_name=="infA"] + 1.8),
+               
+  tsf   = list(x0 = log2(res_translation$baseMean[res_translation$gene_name=="tsf"]),
+               y0 = res_translation$log2FoldChange[res_translation$gene_name=="tsf"],
+               x1 = log2(res_translation$baseMean[res_translation$gene_name=="tsf"]) + 1.5,
+               y1 = res_translation$log2FoldChange[res_translation$gene_name=="tsf"] + 1.5,
+               text_x = log2(res_translation$baseMean[res_translation$gene_name=="tsf"]) + 2,
+               text_y = res_translation$log2FoldChange[res_translation$gene_name=="tsf"] + 1.8),
+
+  infC  = list(x0 = log2(res_translation$baseMean[res_translation$gene_name=="infC"]),
+               y0 = res_translation$log2FoldChange[res_translation$gene_name=="infC"],
+               x1 = log2(res_translation$baseMean[res_translation$gene_name=="infC"]) + 1.5,
+               y1 = res_translation$log2FoldChange[res_translation$gene_name=="infC"] - 1.5,
+               text_x = log2(res_translation$baseMean[res_translation$gene_name=="infC"]) + 2,
+               text_y = res_translation$log2FoldChange[res_translation$gene_name=="infC"] - 1.8),
+
+  infB  = list(x0 = log2(res_translation$baseMean[res_translation$gene_name=="infB"]),
+               y0 = res_translation$log2FoldChange[res_translation$gene_name=="infB"],
+               x1 = log2(res_translation$baseMean[res_translation$gene_name=="infB"]) + 1.5,
+               y1 = res_translation$log2FoldChange[res_translation$gene_name=="infB"] - 1.5,
+               text_x = log2(res_translation$baseMean[res_translation$gene_name=="infB"]) + 2,
+               text_y = res_translation$log2FoldChange[res_translation$gene_name=="infB"] - 1.8)
+)
+
+# Dessiner les traits et labels
+for(g in names(gene_positions)) {
+  pos <- gene_positions[[g]]
+  arrows(
+    x0 = pos$x0, y0 = pos$y0, 
+    x1 = pos$x1, y1 = pos$y1,
+    length = 0,       # pas de flèche
+    col = "black", 
+    lwd = 2           # trait plus gras
+  )
+  text(
+    x = pos$text_x, y = pos$text_y, 
+    labels = g, 
+    cex = 1.1, 
+    font = 2, 
+    col = "black"
+  )
+}
+
+legend("bottomleft", 
+       legend = c("Significant", "Non Significant"),
+       col = c("red", "black"),
+       pch = 20,
+       pt.cex = 1,
+       cex = 0.8,      # taille de la légende
+       bty = "n")       # pas de bordure
+       
 # Close the graphics device
 dev.off()
