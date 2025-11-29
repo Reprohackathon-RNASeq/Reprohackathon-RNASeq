@@ -281,24 +281,45 @@ legend("bottomleft",
 translation_kegg_links <- KEGGREST::keggLink("sao", "sao03010")
 translation2_kegg_links <- KEGGREST::keggLink("sao", "br:sao03012")
 
-
 # Métabolisme des Acides Aminés (sao00970)
 aa_metab_kegg_links <- KEGGREST::keggLink("sao", "sao00970")
+# Aminoacyl-tRNA synthetases (sao01613)
+
+ko_synthetases <- c(
+    # Phe, Leu, Ile, Met, Val
+    "K01889", "K01890", "K01869", "K01870", "K01874", "K01873",
+    # Ser, Pro, Thr, Ala, Tyr, Gln
+    "K01875", "K01881", "K01868", "K01872", "K01866", "K01886",
+    # Glu (Glu/Pro), Lys, Pyl
+    "K01885", "K09698", "K04566", "K04567", "K11627",
+    # His, Asn, Asp
+    "K01892", "K01893", "K01876", "K09759", "K01884",
+    # Cys, Trp, Arg
+    "K01883", "K01867", "K01887", "K01880",
+    # Gly, Sep, (Inconnu)
+    "K01878", "K01879", "K14164", "K07587", "K01894" 
+)
+
+aa_trna_ssynthetases_links <- KEGGREST::keggLink("sao", ko_synthetases)
 
 # Traduction
 translation_tags <- toupper(gsub("sao:", "", translation_kegg_links))
 translation2_tags <- toupper(gsub("sao:", "", translation2_kegg_links))
 # Métabolisme des AA
 aa_metab_tags <- toupper(gsub("sao:", "", aa_metab_kegg_links))
-
+# Aminoacyl-tRNA synthetases
+aa_trna_ssynthetases_tags <- toupper(gsub("sao:", "", aa_trna_ssynthetases_links))
 # Combine les gènes
-genes_of_interest <- unique(c(translation_tags, aa_metab_tags, translation2_tags))
+genes_of_interest <- unique(c(translation_tags, aa_metab_tags, translation2_tags, aa_trna_ssynthetases_tags))
 
 # Garder uniquement les gènes de traduction
 res_translation <- res_df_clean[res_df_clean$Locus_Tag %in% genes_of_interest, ]
 
-cat("Nombre de gènes dans translation2_tags :", length(translation2_tags), "\n")
-cat("Nombre de gènes dans genes_of_interest :", length(genes_of_interest), "\n")
+
+cat("Nombre de gènes dans sao03010 :", length(translation2_tags), "\n")
+cat("Nombre de gènes dans sao03012 :", length(translation2_tags), "\n")
+cat("Nombre de gènes dans sao00970 :", length(genes_of_interest), "\n")
+cat("Nombre de gènes dans sao01613 :", length(aa_trna_ssynthetases_tags), "\n")
 cat("Nombre de gènes dans res_translation :", nrow(res_translation), "\n")
 
 ###############################################################################
@@ -346,7 +367,7 @@ M_t <- res_translation$log2FoldChange
 A_t <- log2(res_translation$baseMean)
 
 # Couleurs (gènes significatifs/non significatifs)
-point_colors_t <- ifelse(res_translation$padj < padj_cutoff, red_transp, black_transp)
+point_colors_t <- ifelse(res_translation$padj < padj_cutoff, "red", "grey50")
 
 # Ouvrir PNG
 png(output_translation_plot, width = 700, height = 700, res = 150, type = "cairo")
@@ -387,9 +408,9 @@ axis(side = 2, at = seq(-6, 5, by = 1), lwd = 2, lwd.ticks = 2, tcl = -0.3, las 
 
 # Points
 points(
-  x = A_t[M_t < 4 & M_t > -4],
-  y = M_t[M_t < 4 & M_t > -4],
-  col = point_colors_t[M_t < 4 & M_t > -4],
+  x = A_t[M_t < 5 & M_t > -6],
+  y = M_t[M_t < 5 & M_t > -6],
+  col = point_colors_t[M_t < 5 & M_t > -6],
   pch = 20,
   cex = 0.6
 )
@@ -464,6 +485,28 @@ legend("bottomleft",
        pt.cex = 1,
        cex = 0.8,      # taille de la légende
        bty = "n")       # pas de bordure
-       
+
+legend("bottomright", 
+       legend = c("AA-tRNA synthetases"), 
+       col = c("black"), 
+       pch = 1,         
+       pt.cex = 0.9,
+       bty = "n",
+       cex = 0.8)
+
+
+res_translation$is_aa_trna_ssynthetases <- res_translation$Locus_Tag %in% aa_trna_ssynthetases_tags
+aa_trna_ssynthetases_points <- res_translation[res_translation$is_aa_trna_ssynthetases & 
+                                   res_translation$log2FoldChange < 5 & 
+                                   res_translation$log2FoldChange > -6, ]
+
+points(
+  x = log2(aa_trna_ssynthetases_points$baseMean),
+  y = aa_trna_ssynthetases_points$log2FoldChange,
+  pch = 1,       
+  col = "black", 
+  lwd = 2,      
+  cex = 0.9
+)
 # Close the graphics device
 dev.off()
