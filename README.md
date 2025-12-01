@@ -20,7 +20,6 @@ Bacterial **persisters** are phenotypic variants that:
 
 ### 📊 RNA-Seq Analysis Pipeline Overview
 ![Pipeline Overview](Pipeline.png)
-FASTQ Download → Quality Check → Trimming → Mapping → Counting → Statistical Analysis
 
 ## 🚀 Installation and Execution
     
