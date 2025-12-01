@@ -19,7 +19,7 @@ Bacterial **persisters** are phenotypic variants that:
 - Constitute a **reservoir for relapses**
 
 ### 📊 RNA-Seq Analysis Pipeline Overview
-![Pipeline Overview](assets/pipeline.png)
+![Pipeline Overview](pipeline.png)
 FASTQ Download → Quality Check → Trimming → Mapping → Counting → Statistical Analysis
 
 ## 🚀 Installation and Execution
