@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass{article}[H]
 \usepackage{graphicx} % Required for inserting images
 \usepackage{hyperref} % For clickable links
 \usepackage{url}
@@ -6,6 +6,9 @@
 \usepackage{xcolor}
 \usepackage[a4paper, margin=2.5cm]{geometry}
 \usepackage{float}
+
+\usepackage{caption} % to make subfigures
+\usepackage{subcaption} % to make subfigures
 
 \title{Reprohackathon-RNASeq}
 \author{Donatien Wallaert, Tom Bellivier, Marie Meier, Tom Gortana}
@@ -236,6 +239,15 @@ The last process performs statistical analysis in order to reproduce the two gen
     Rscript ${script_R} ${coldata} ${count_matrix} ma_plot.png
 \end{lstlisting}
 
+\subsection{Comparing results with the original study}
+To quantitatively assess the concordance between our differential expression results and those reported by Peyrusson et al., we implemented a dedicated Nextflow process, \texttt{RESULTS\_COMPARISON}. This process utilizes an R script to compare log$_2$ fold changes from our DESeq2 analysis with the reference values provided in the original publication. The process takes as input a tuple containing the paths to our DESeq2 results file, the reference results file from Peyrusson et al., and the R script for comparison. It outputs a scatter plot visualizing the correlation between the two sets of log$_2$ fold changes, along with a computed Pearson correlation coefficient. 
+
+\begin{lstlisting}[language=bash, frame=single, basicstyle=\ttfamily\small, breaklines=true]
+    Rscript ${script_R} ${matrix_stat} ${results_article} comparison_plot.png
+\end{lstlisting}
+
+The paper also contains a plot showing only the translation genes that we have to reproduce. In order to exctract translation genes, we had to search for Kegg orthology numbers corresponding to translation genes. We found them on the Kegg website (\url{https://www.kegg.jp/brite/ko03012}). The script filters the DESeq2 results to retain only genes with KOs in the provided list, and generates a plot similar to the MA-plot but restricted to translation genes. We used the following saos  : sao03010 (Ribosome, factors, etc.), sao03012 (Aminoacyl-tRNA biosynthesis), sao00970 (Amino Acid Metabolism) and sao01613 (Aminoacyl-tRNA synthetases). Concerning the latter, we had tu enumerate every KO identifiers corresponding to aminoacyl-tRNA synthetases.
+
 \section{Results}
 
 \subsection{Count Matrix}
@@ -249,20 +261,68 @@ For each gene, the matrix reports its chromosome (CP000253.1), start and end pos
 
 Using the \texttt{STAT\_ANALYSIS.R} script, the DESeq2 analysis was executed directly from the count matrix and \texttt{coldata} file to reproduce the MA-plot of the complete RNA-seq dataset shown in Supplementary Figure~3 of Peyrusson \textit{et al.}. The script builds a \texttt{DESeqDataSet} with design \texttt{\textasciitilde{} Condition}, runs the standard DESeq2 pipeline with default parameters, and extracts the contrast \textit{IP vs.\ control}, yielding for each gene a base mean of normalized counts, a log$_2$ fold change, and an adjusted $p$-value. From these results, we computed the MA coordinates (A = log$_2$(baseMean), M=log$_2$ fold change) and generated a custom base‑R plot, exporting the figure as \texttt{ma\_plot.png} (Figure~\ref{fig:ma_plot_ours}).
 
+% Subfigures
 \begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
     \centering
-    \includegraphics[width=0.7\textwidth]{ma_plot.png}
-    \caption{MA-plot of the complete RNA-seq dataset obtained with our DESeq2 analysis (IP vs.\ control). Red points indicate genes with adjusted $p$-value $< 0.05$, black points non-significant genes.}
-    \label{fig:ma_plot_ours}
+    \includegraphics[width=1\textwidth]{ma_plot.png}
+    \caption{MA-plot from our DESeq2 analysis.}
+    \label{fig:MA-plot}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{article_ma_plot.png}
+    \caption{MA-plot from the article.}
+    \label{fig:article-MA-plot}
+\end{subfigure}
+\caption{Comparison of MA-plots: (a) reproduced from our DESeq2 analysis; (b) original from Peyrusson \textit{et al.} Supplementary Figure 3. Red points indicate genes with adjusted $p$-value $< 0.05$, black points non-significant genes.}
+\label{fig:MA-plots-comparaison}
 \end{figure}
 
 Our MA-plot reproduces both the global structure and the visual style of the original supplementary figure: genes are centred around a log$_2$ fold change of zero, with increased dispersion at low counts and a clear band of significant genes (red points) extending towards positive and negative fold changes at higher mean expression values. As in the publication, log$_2$ fold changes are truncated at ±4, with points beyond these thresholds shown as triangles at the top or bottom of the plot, and significance is highlighted with an adjusted $p$-value cutoff of 0.05. Qualitatively, the density and spread of significant genes across the dynamic range of normalized counts are very similar to those reported by Peyrusson \textit{et al.}, indicating that our workflow rapidly recovers a transcriptomic signature that is globally consistent with the original RNA‑seq differential expression analysis.
 
-\subsection{Repro}
+\subsection{Correlation of Log$_2$ Fold Changes and pads with the Original Study}
 
-\section{Conclusion/Perspectives}
+To quantitatively assess how well our differential expression analysis reproduces the results of Peyrusson \textit{et al.}, we compared our DESeq2 log$_2$ fold changes with the reference log$_2$ fold changes provided by the authors for each gene. For this purpose, we implemented the script \texttt{RESULTS\_COMPARISON.R}, which reads our statistical results and the reference results, joins them by gene identifier (\texttt{Locus\_Tag}), and computes a Pearson correlation coefficient between the two sets of log$_2$ fold changes. Genes are then classified into four categories according to their adjusted $p$‑values in both analyses: significant in both datasets, significant only in our data, significant only in the article, or non‑significant in either.
 
-This reprohackathon project presented a great opportunity to confront both the practical and theoretical challenges of reproducing published RNA-seq analyses in a fully transparent and reproducible manner. Among the key lessons learned was the care that needed to be taken in selecting, installing, and documenting the correct versions of all libraries and tools. The creation of Docker containerized environments for each main component of the analyses, such as the SRA Toolkit, Bowtie, and Samtools, ensured computational reproducibility and avoided a series of common problems related to software incompatibilities and version changes.
+The script produces a scatter plot where each point represents a gene, with the reference log$_2$ fold change on the $x$‑axis and our calculated log$_2$ fold change on the $y$‑axis (Figure~\ref{fig:log2fc_corr}). The points closely cluster around the diagonal, and the overall Pearson correlation reaches $R = 0.915$, indicating a strong concordance between our pipeline and the original analysis. Genes that are significant in both datasets (dark red points) align particularly well with the diagonal, while genes significant in only one of the two analyses (orange or dark blue points) are more dispersed, highlighting the impact of borderline $p$‑values, multiple‑testing corrections, and small differences in preprocessing or software versions.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{comparison_plot.png} % ou .jpg selon ton fichier
+    \caption{Correlation between reference log$_2$ fold changes from Peyrusson \textit{et al.} and log$_2$ fold changes recalculated with our DESeq2 workflow. Each point corresponds to one gene; colours indicate significance categories (padj $< 0.05$) in the two analyses.}
+    \label{fig:log2fc_corr}
+\end{figure}
+
+\subsection{Reproduction of the plot of translation genes}
+
+After filtering the genes, the script \texttt{STAT\_ANALYSIS.R} returns the plots with only translation-related genes, as shown in Figure~\ref{fig:translation-plot} below. 
+
+% Subfigures
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=0.9\textwidth]{translation_plot.png}
+    \caption{MA-plot from our DESeq2 analysis.}
+    \label{fig:translation-plot}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+    \centering
+    \includegraphics[width=1\textwidth]{article_translation_plot.png}
+    \caption{MA-plot from the article.}
+    \label{fig:article-translation-plot}
+\end{subfigure}
+\caption{Comparison of MA-plots for translation-related genes: (a) reproduced from our DESeq2 analysis; (b) original from Peyrusson \textit{et al.} Figure 3b. Red points indicate genes with adjusted $p$-value $< 0.05$, black points non-significant genes.}
+\label{fig:translation-plots-com}
+\end{figure}
+
+The plots are quitte similar exept that in our plot, there are less significant genes (in red) than in the article's plot. This may be due to differences in the SAO and KO numbers used to filter the genes, as KEGG certainly updates their databases since the publication of the article. It may also be explained by small differences in the preprocessing steps or software versions used in our workflow compared to the original analysis.
+
+\section{Discussion/Perspectives}
+
+This reprohackathon project presented a great opportunity to confront both the practical and theoretical challenges of reproducing published RNA-seq analyses in a fully transparent and reproducible manner. Among the key lessons learned was the care that needed to be taken in selecting, installing, and documenting the correct versions of all libraries and tools. The creation of Docker containerized environments for each main component of the analyses, such as the SRA Toolkit, Bowtie, and Samtools, ensured computational reproducibility and avoided a series of common problems related to software incompatibilities and version changes. Different values of the parameters in Trim Galore have been tested out (for example plots with q = 30 or length = 50), but it didn't change a lot the results. We could have tested to reproduce both plots by using newer containers for each process, in order to test the limits of reproducibility when the software versions are different from the original article.
 
 The time consumed by researching and checking compatible library versions was not superfluous---this was quite important at each step of the workflow execution and for supporting collaboration within the team. Indexing the reference genome and mapping sequence reads to it, using Nextflow workflows and Dockerized Bowtie, showed how crucial accurate sequence alignment is for later gene expression analyses. Thanks to careful workflow management and strict control of the computational environment, the mapping steps produced reliable alignment results, forming a solid basis for differential expression analysis. This reproducible workflow made it possible to correctly identify and extract sequences of interest---specifically, the differentially expressed genes typical of intracellular \textit{S. aureus} persisters exposed to antibiotics.
 
