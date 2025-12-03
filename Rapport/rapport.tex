@@ -22,9 +22,9 @@
 
 \begin{enumerate}
   \item Introduction
-  \item Material and Methods (Tools used, and setup)
-  \item Results (Workflow developed, results obtained after execution)
-  \item Conclusion / perspectives (Interpretation of the results, and conclusion about reproducibility)
+  \item Materials and Methods (Tools used and setup)
+  \item Results (Workflow and comparison with the article)
+  \item Discussion (Interpretation of the results and conclusion about reproducibility)
 \end{enumerate}
 
 \section{Introduction}
@@ -33,11 +33,11 @@ Reproducibility is a core principle of the scientific method, as it allows indep
 
 This reprohackathon project focuses on reproducing the RNA-sequencing analysis from Peyrusson et al. (Nature Communications, 2020), which examined intracellular Staphylococcus aureus persisters during antibiotic exposure. Persister cells are phenotypic variants that transiently tolerate antibiotics without carrying genetic resistance mutations, making them important contributors to treatment failure and recurrent infections.
 
-\subsection{Biological Context: Staphylococcus aureus Persisters and Antibiotic Tolerance}
+\subsection{Biological Context: \textit{Staphylococcus aureus} Persisters and Antibiotic Tolerance}
 
-Staphylococcus aureus is a major human pathogen causing infections that range from mild skin disease to severe invasive syndromes. Intracellular survival of S. aureus within host cells such as macrophages is thought to promote infection recurrence by sheltering bacteria from immune responses and antibiotic activity. Under intracellular stresses, a subpopulation can adopt a persister state characterized by growth arrest and high tolerance to bactericidal antibiotics.
+\textit{Staphylococcus aureus} is a major human pathogen causing infections that range from mild skin disease to severe invasive syndromes. Intracellular survival of \textit{S. aureus} within host cells, such as macrophages, is believed to promote infection recurrence by protecting bacteria from immune responses and antibiotic activity. Under intracellular stresses, a subpopulation can adopt a persister state characterized by growth arrest and high tolerance to bactericidal antibiotics.
 
-Peyrusson et al. used single-cell fluorescence-based approaches to show that intracellular S. aureus surviving antibiotic treatment display biphasic killing kinetics, with most bacteria rapidly dying and a minority persisting for prolonged periods. The persister phenotype was stable under antibiotic pressure but reversible once the drug was removed, as non-dividing cells resumed growth when the stress was lifted.
+Peyrusson et al. used single-cell fluorescence-based approaches to show that intracellular \textit{S. aureus} surviving antibiotic treatment display biphasic killing kinetics, with most bacteria rapidly dying and a minority persisting for prolonged periods. The persister phenotype was stable under antibiotic pressure but reversible once the drug was removed, as non-dividing cells resumed growth when the stress was lifted.
 
 Transcriptomic profiling in the same study revealed that intracellular persisters remained metabolically active but exhibited a markedly reprogrammed gene expression pattern. RNA-seq identified 1,477 differentially expressed genes between intracellular persisters and control bacteria, including induction of stringent response, cell wall stress, SOS DNA damage, and heat shock pathways, which together were associated with multidrug tolerance and cross-tolerance to unrelated antibiotics.
 
@@ -53,7 +53,7 @@ RNA-seq results can vary substantially across pipelines due to differences in so
 
 Reprohackathons are training-oriented hackathon events where participants attempt to reproduce published analyses using modern reproducibility technologies. These projects expose students to real-world obstacles such as missing methods, unavailable data, deprecated software, and limited computational resources, while also demonstrating how containerization and workflow systems can overcome such barriers.
 
-In this project, the reprohackathon centers on reproducing the RNA-seq component of the Peyrusson et al. study, focusing on differential gene expression between intracellular S. aureus persisters exposed to oxacillin and control bacteria. The workflow relies on Docker for environment management, Nextflow for pipeline automation, and Git for systematic tracking of code and configuration changes, with the goal of producing a fully reproducible and shareable analysis.
+In this project, the reprohackathon centers on reproducing the RNA-seq component of the Peyrusson et al. study, focusing on differential gene expression between intracellular \textit{S. aureus} persisters exposed to oxacillin and control bacteria. The workflow relies on Docker for environment management, Nextflow for pipeline automation, and Git for systematic tracking of code and configuration changes, with the goal of producing a fully reproducible and shareable analysis.
 
 \section{Materials and Methods}
 
@@ -259,7 +259,11 @@ For each gene, the matrix reports its chromosome (CP000253.1), start and end pos
 
 \subsection{Differential Expression and Reproduction of the MA-plot}
 
-Using the \texttt{STAT\_ANALYSIS.R} script, the DESeq2 analysis was executed directly from the count matrix and \texttt{coldata} file to reproduce the MA-plot of the complete RNA-seq dataset shown in Supplementary Figure~3 of Peyrusson \textit{et al.}. The script builds a \texttt{DESeqDataSet} with design \texttt{\textasciitilde{} Condition}, runs the standard DESeq2 pipeline with default parameters, and extracts the contrast \textit{IP vs.\ control}, yielding for each gene a base mean of normalized counts, a log$_2$ fold change, and an adjusted $p$-value. From these results, we computed the MA coordinates (A = log$_2$(baseMean), M=log$_2$ fold change) and generated a custom base‑R plot, exporting the figure as \texttt{ma\_plot.png} (Figure~\ref{fig:ma_plot_ours}).
+Using the \texttt{STAT\_ANALYSIS.R} script, the DESeq2 analysis was executed directly from the count matrix and \texttt{coldata} file to reproduce the MA-plot of the complete RNA-seq dataset shown in Supplementary Figure~3 of Peyrusson \textit{et al.}. The script builds a \texttt{DESeqDataSet} with design \texttt{\textasciitilde{} Condition}, runs the standard DESeq2 pipeline with default parameters, and extracts the contrast \textit{IP vs.\ control}, yielding for each gene a base mean of normalized counts, a log$_2$ fold change, and an adjusted $p$-value.
+
+The PCA of the Variance Stabilizing Transformation (VST) data was performed to assess global sample variance (Supplementary Fig.1). The plot clearly shows that the Condition variable (IP vs. Control) accounts for the majority of the variance ($\text{PC1}$: $86\%$), demonstrating a strong separation between the biological groups. However, one control sample (SRR10379726) is identified as a clear outlier, lying significantly distant from its two biological replicates. This indicates a major technical or biological deviation in that specific sample, which may have affected the dispersion estimation in the control group.
+
+From these results, we computed the MA coordinates (A = $\log_2(\text{baseMean})$, M=$\log_2$ fold change) and generated a custom base‑R plot, exporting the figure as \texttt{ma\_plot.png} (Figure 2.a).
 
 % Subfigures
 \begin{figure}[H]
@@ -282,7 +286,7 @@ Using the \texttt{STAT\_ANALYSIS.R} script, the DESeq2 analysis was executed dir
 
 Our MA-plot reproduces both the global structure and the visual style of the original supplementary figure: genes are centred around a log$_2$ fold change of zero, with increased dispersion at low counts and a clear band of significant genes (red points) extending towards positive and negative fold changes at higher mean expression values. As in the publication, log$_2$ fold changes are truncated at ±4, with points beyond these thresholds shown as triangles at the top or bottom of the plot, and significance is highlighted with an adjusted $p$-value cutoff of 0.05. Qualitatively, the density and spread of significant genes across the dynamic range of normalized counts are very similar to those reported by Peyrusson \textit{et al.}, indicating that our workflow rapidly recovers a transcriptomic signature that is globally consistent with the original RNA‑seq differential expression analysis.
 
-\subsection{Correlation of Log$_2$ Fold Changes and pads with the Original Study}
+\subsection{Correlation of Log$_2$ Fold Changes and padj with the Original Study}
 
 To quantitatively assess how well our differential expression analysis reproduces the results of Peyrusson \textit{et al.}, we compared our DESeq2 log$_2$ fold changes with the reference log$_2$ fold changes provided by the authors for each gene. For this purpose, we implemented the script \texttt{RESULTS\_COMPARISON.R}, which reads our statistical results and the reference results, joins them by gene identifier (\texttt{Locus\_Tag}), and computes a Pearson correlation coefficient between the two sets of log$_2$ fold changes. Genes are then classified into four categories according to their adjusted $p$‑values in both analyses: significant in both datasets, significant only in our data, significant only in the article, or non‑significant in either.
 
@@ -310,7 +314,7 @@ After filtering the genes, the script \texttt{STAT\_ANALYSIS.R} returns the plot
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
     \centering
-    \includegraphics[width=1\textwidth]{article_translation_plot.png}
+    \includegraphics[width=0.9\textwidth]{article_translation_plot.png}
     \caption{MA-plot from the article.}
     \label{fig:article-translation-plot}
 \end{subfigure}
@@ -320,13 +324,13 @@ After filtering the genes, the script \texttt{STAT\_ANALYSIS.R} returns the plot
 
 The plots are quitte similar exept that in our plot, there are less significant genes (in red) than in the article's plot. This may be due to differences in the SAO and KO numbers used to filter the genes, as KEGG certainly updates their databases since the publication of the article. It may also be explained by small differences in the preprocessing steps or software versions used in our workflow compared to the original analysis.
 
-\section{Discussion/Perspectives}
+\section{Discussion}
 
-This reprohackathon project presented a great opportunity to confront both the practical and theoretical challenges of reproducing published RNA-seq analyses in a fully transparent and reproducible manner. Among the key lessons learned was the care that needed to be taken in selecting, installing, and documenting the correct versions of all libraries and tools. The creation of Docker containerized environments for each main component of the analyses, such as the SRA Toolkit, Bowtie, and Samtools, ensured computational reproducibility and avoided a series of common problems related to software incompatibilities and version changes. Different values of the parameters in Trim Galore have been tested out (for example plots with q = 30 or length = 50), but it didn't change a lot the results. We could have tested to reproduce both plots by using newer containers for each process, in order to test the limits of reproducibility when the software versions are different from the original article.
+This project presented a great opportunity to confront both the practical and theoretical challenges of reproducing published RNA-seq analyzes in a fully transparent and reproducible manner. Among the key lessons learned was the care that needed to be taken in selecting, installing and documenting the correct versions of all libraries and tools. The creation of Docker containerized environments for each main component of the analyzes, such as the SRA Toolkit, Bowtie, and Samtools, ensured computational reproducibility and avoided a series of common problems related to software incompatibilities and version changes. Different values of the parameters in Trim Galore have been tested out (for example plots with q = 30 or length = 50), but the results (Supplementary Fig. 2,3) did not change much. We could have tested reproducing both plots by using newer containers for each process, to test the limits of reproducibility when the software versions are different from the original article.
 
-The time consumed by researching and checking compatible library versions was not superfluous---this was quite important at each step of the workflow execution and for supporting collaboration within the team. Indexing the reference genome and mapping sequence reads to it, using Nextflow workflows and Dockerized Bowtie, showed how crucial accurate sequence alignment is for later gene expression analyses. Thanks to careful workflow management and strict control of the computational environment, the mapping steps produced reliable alignment results, forming a solid basis for differential expression analysis. This reproducible workflow made it possible to correctly identify and extract sequences of interest---specifically, the differentially expressed genes typical of intracellular \textit{S. aureus} persisters exposed to antibiotics.
+The time consumed by researching and checking compatible library versions was not superfluous, this was quite important at each step of the workflow execution and for supporting collaboration within the team. Indexing the reference genome and mapping the reads of the sequence to it, using Nextflow workflows and Dockerized Bowtie, showed how crucial accurate sequence alignment is for later gene expression analyzes. Thanks to careful workflow management and strict control of the computational environment, the mapping steps produced reliable alignment results, forming a solid basis for differential expression analysis. This reproducible workflow made it possible to correctly identify and extract sequences of interest, specifically the differentially expressed genes typical of intracellular \textit{S. aureus} persisters exposed to antibiotics.
 
-Looking forward, this project highlights the increasing importance of automation and reproducibility frameworks in computational biology. Future work should aim to further improve workflow modularity and scalability, extend the pipeline to support more experimental situations, and integrate new analytical tools as they become available. Finally, keeping a strong focus on transparency, documentation, and version control will remain essential to ensure that bioinformatics analyses stay robust, shareable, and accessible to the wider scientific community.
+This project highlights the increasing importance of automation and reproducibility frameworks in computational biology. Future work should aim to further improve workflow modularity and scalability, extend the pipeline to support more experimental situations, and integrate new analytical tools as they become available. Finally, keeping a strong focus on transparency, documentation, and version control will remain essential to ensure that bioinformatics analyzes stay robust, shareable, and accessible to the wider scientific community.
 
 \section{References}
 \begin{enumerate}
@@ -344,5 +348,67 @@ Looking forward, this project highlights the increasing importance of automation
     \item Docker Documentation. Available at \url{https://docs.docker.com} Accessed November 2025.
 \end{enumerate}
 
+\clearpage
+\appendix
+\section*{Supplementary Figures}
+\setcounter{figure}{0}
+\renewcommand{\thefigure}{A\arabic{figure}} 
+
+% --- FIGURE A1: PCA (SEULE) ---
+% Ceci est la Supplementary Fig. 1.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{pca_plot.png}
+    
+    \caption*{Supplementary Figure 1. Principal Component Analysis (PCA) of VST-transformed samples. The plot validates separation based on biological condition (IP vs. Control) and identifies sample outliers.}
+    \label{fig:Supplementary_1_PCA}
+\end{figure}
+
+\vspace{1em}
+
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{ma_plot_q30.png}
+        \caption{Global MA-plot of results obtained using a strict quality filter (Q30 vs. Q20 baseline).}
+        \label{fig:Annexe_Q30_Global}
+    \end{subfigure}
+    \hfill % Espace horizontal
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{translation_plot_q30.png}
+        \caption{MA-plot of Translation-related genes using a strict quality filter (Q30).}
+        \label{fig:Annexe_Q30_Translation}
+    \end{subfigure}
+
+    \caption*{Supplementary Figure 2: Impact of Strict Quality Filtering (Q30). Comparison of global differential expression and translation gene enrichment.}
+    \label{fig:Supplementary_2_Q30}
+\end{figure}
+
+\vspace{1em}
+
+\begin{figure}[H]
+    \centering
+    
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{ma_plot_length50.png}
+        \caption{MA-plot with Length = 50 nt (Strict Length Filter).}
+        \label{fig:Annexe_MA_L50}
+    \end{subfigure}
+    \hfill % Espace horizontal
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{translation_plot_length50.png}
+        \caption{MA-plot of Translation Genes with length = 50 nt.}
+        \label{fig:Annexe_Translation_L50}
+    \end{subfigure}
+
+    \caption*{Supplementary Figure 3: Impact of Minimum Read Length (50 nt). Comparison of differential expression results with the original protocol (25 nt baseline).}
+    \label{fig:Supplementary_3_L50}
+\end{figure}
 
 \end{document}
