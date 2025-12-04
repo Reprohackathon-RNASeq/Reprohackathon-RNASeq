@@ -31,7 +31,7 @@ The workflow is implemented using Nextflow and encapsulated in Docker containers
 * Differential expression analysis with DESeq2
 * Annotation of differentially expressed genes using AureoWiki and KEGG resources
 
-![Pipeline Overview](Pipeline.png)
+![Pipeline Overview](./RNASeqanalysis/results/Pipeline.png)
 
 ## Installation and Execution
     
