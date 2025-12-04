@@ -50,7 +50,12 @@ cd Reprohackathon-RNASeq/RNASeqanalysis
 chmod +x run.sh
 ./run.sh
 ```
+### Parameters
+The pipeline provides several configurable parameters to customize the analysis. --test true can be used to download only the first 10,000 reads for quick testing. --threads sets the number of cores for each step (default: 1 core, except 3 for DOWNLOAD_FASTQ, 3 for FEATURE_COUNTS, 2 for INDEX_REF_GENOME, and 3 for MAPPING_BOWTIE). Users can specify either a single SRA run (--sra_run SRRXXXX) or a full SRA project (--sra_project SRPXXXX) to download data. The pipeline can also accept a reference genome (--ref_genome) and a GEO dataset ID (--geo_id). By default, run.sh executes:
 
+```
+nextflow run main.nf --sra_project SRP227811 --ref_genome CP000253.1 --geo_id GSE139659
+```
 ## Contributors
 
 Tom BELLIVIER
