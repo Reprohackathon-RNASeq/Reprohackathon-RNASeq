@@ -64,12 +64,13 @@ The original experimental protocol involved infecting J774 macrophages with \tex
 
 Figure~\ref{fig:Workflow} summarizes the complete computational workflow implemented to reproduce the RNA-seq analysis, from data download to statistical analysis in DESeq2.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{process_docker.png}
+    \includegraphics[width=0.5\textwidth]{process_docker.png}
     \caption{Complete Workflow}
     \label{fig:Workflow}
 \end{figure}
+
 
 \subsection{FASTQ File Download: Project-wide and Single-run Strategies}
 The initial step of our RNA-seq workflow involved the automated retrieval of raw sequencing data in FASTQ format for each SRA run accession associated with the study. To ensure computational reproducibility and ease of deployment across different environments, the download process was encapsulated both as a dedicated Nextflow process and within a custom Docker container built for the SRA Toolkit.
@@ -145,7 +146,8 @@ This script extracts the SRA ID from each filename and processes it with the spe
 \subsection{Reference Genome and Annotation Download}
 To replicate the RNA-seq analysis pipeline exactly, the reference genome and its genome annotation for \textit{Staphylococcus aureus} were retrieved from NCBI using the accession number CP000253.1. This step was automated in the reproducible workflow using a dedicated Nextflow process, \texttt{GET\_DATA\_GENOME}, which interfaces with the NCBI Entrez system for nucleotide data retrieval.
 
-The process downloads two essential files: the reference genome sequence in FASTA format (\texttt{reference.fasta}), and the genome annotation in GFF3 format (\texttt{annotation.gff}). Both files serve as critical inputs for mapping and feature quantification steps downstream.
+The process downloads two essential files: the reference genome sequence in FASTA format
+reference.fasta, and the genome annotation in GFF3 format (\texttt{annotation.gff}). Both files serve as critical inputs for mapping and feature quantification steps downstream.
 
 This process uses the \texttt{esearch} and \texttt{efetch} utilities provided by the Entrez Direct Docker container to ensure consistency and reproducibility. The container guarantees that the exact same versions of Entrez tools are used, avoiding variability in database queries.
 
@@ -162,7 +164,7 @@ Providing an automated, containerized environment for this step avoids manual do
 \subsection{Index creation using Bowtie}
 
 The next step is to index the reference genome. Without an index, the algorithm would have to linearly scan the entire genome for each read, which would be extremely slow. The index allows the data to be structured for efficient searching.
-The library used to perform this indexing is Bowtie. For reproducibility purposes, we work on a docker containing Bowtie version 0.12.7, available at https://sourceforge.net/projects/bowtie-bio/postdownload.
+The library used to perform this indexing is Bowtie. For reproducibility purposes, we work on a docker containing Bowtie version 0.12.7.
 In the following process, we will also use samtools and bowtie. So we create a single “bowtie” docker that contains both libraries with the appropriate versions and the latest ubuntu version.
 The docker image is stored on dockerhub at the following address: mariemeier/reprohackathon:bowtie. We create a new nextflow process named \texttt{INDEX\_REF\_GENOME} that takes the reference fastq file as input and returns the indexed reference genome in the results/index directory. Indexing is performed by the bowtie-build function within the docker. The next bash command is executed : 
 
